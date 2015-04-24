@@ -1,7 +1,12 @@
 {
   "name": "ember-ist-model-builder",
-  "version": "0.0.0",
-  "description": "The default blueprint for ember-cli addons.",
+  "version": "0.1.0",
+  "description": "Builds enhanced Ember models to help with display, child management, formatting, decorating, and archiving.",
+  "bugs": {
+    "url": "https://github.com/bdevel/ember-ist-model-builder/issues"
+  },
+  "homepage": "https://github.com/bdevel/ember-ist-model-builder",
+  "repository": "",
   "directories": {
     "doc": "doc",
     "test": "tests"
@@ -11,11 +16,10 @@
     "build": "ember build",
     "test": "ember test"
   },
-  "repository": "",
   "engines": {
     "node": ">= 0.10.0"
   },
-  "author": "",
+  "author": "Tyler Roberts",
   "license": "MIT",
   "devDependencies": {
     "broccoli-asset-rev": "^2.0.2",
