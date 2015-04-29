@@ -37,6 +37,6 @@ export default function(modelConfig) {
         }
       });
       return json;
-    }),
+    }).volatile(),
   };// end return
 }// end export

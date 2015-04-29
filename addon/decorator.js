@@ -1,20 +1,35 @@
 import Ember from 'ember';
 import DS from 'ember-data';
 
+/*
+The IST Model Builder Decorator is an extension to DS.Model
+that works like an Ember.ObjectProxy. Use it when you have some API
+data that is read-only but you need the user to apply their 
+own settings and properties to it.
 
-export default function(newModel) {
-  var modelConfig = newModel.modelConfig;
+- The `proxyTo` property is read only. Any set properties will be set on the
+  model and not to the proxy.
+
+- The `proxyTo` object is cached inside the model. It will try to find a new
+  version of `proxyTo` in the store when the model is loaded. If it 404s then
+  it will used the cached version to build a new unsaved model of type `proxyKind`.
+  This ensures that any computed properties will be available.
   
+*/
+export default function(newModel) {
+  if (!Ember.isBlank(newModel.attributes) ){
+    console.error('Arguments for IstModelDecorator is a model config and not an object for DS.Model. IstModelDecorator is not a mixin.');
+    return;
+  }
+  
+  var modelConfig = newModel.modelConfig;
   newModel.proxyCache = DS.attr('raw');
   newModel.proxyKind  = DS.attr('string');
   newModel.proxyId    = DS.attr('string');
-
-  // Set the inExport properties to the model and not the proxy.
-  if (modelConfig.addExportProperties === true || modelConfig.addExportProperties === undefined) {
-     // Add a place for us to store proxy properties locally.
-     newModel.proxyLocalProperties = DS.attr('raw', {defaultValue: {} });
-   }
-   
+  
+  // Add a place for us to store modified proxy properties locally.
+  newModel.proxyLocalProperties = DS.attr('raw', {defaultValue: {} });
+  
   return DS.Model.extend(newModel).extend(Ember._ProxyMixin).extend({
     fetchFromStore: true,
     proxyTo:        null,// use myModel.set('proxyTo', otherModel);
@@ -71,34 +86,30 @@ export default function(newModel) {
         // it's a promise
       }
     }),
-    
-    // Set the inExport properties to the model and not the proxy.
-    // Add a place for us to store proxy properties locally.
-    setUnknownProperty: function (key, value) {
-      if (key.match(/InExport$/)  && this.get('proxyLocalProperties')  !== undefined) {
-        // Set the asignment key to our special store
-        key = 'proxyLocalProperties.' + key;
-        this.set(key, value);
-      }
-      
-      // Also set it on the object itself
-      return this._super.apply(this, arguments);
-    },
-    
-    unknownProperty: function (key) {
-      if (key.match(/InExport$/) && this.get('proxyLocalProperties')  !== undefined) {
-        // Check our special store first
-        key = 'proxyLocalProperties.' + key;
-        
-        var value = this.get(key);
-        if (value !== undefined){
-          return value;
-        }
-      }
-      // Else return whatever super wants.
-      return this._super.apply(this, arguments);
-    }
 
+    // Any unknown property changes will be stored
+    // in `proxyLocalProperties` so that the proxyTo
+    // object remains unchanged.
+    setUnknownProperty: function (key, value) {
+      // Set the asignment key to our special store
+      var localKey = 'proxyLocalProperties.' + key;
+      return this._super(localKey, value);
+    },
+
+    // Pull properties out of `proxyLocalProperties`
+    // if it is in there.
+    unknownProperty: function (key) {
+      // Check our special store first
+      var localKey = 'proxyLocalProperties.' + key;
+      var value = this.get(localKey);
+      if (value !== undefined){
+        return value;
+      } else {
+        // have it ask the proxy object for a value.
+        return this._super.apply(this, arguments);
+      }
+    }
+    
   });// end extend for decoratorModel
   
 } // end export

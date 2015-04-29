@@ -6,7 +6,10 @@
     "url": "https://github.com/bdevel/ember-ist-model-builder/issues"
   },
   "homepage": "https://github.com/bdevel/ember-ist-model-builder",
-  "repository": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bdevel/ember-ist-model-builder.git"
+  },
   "directories": {
     "doc": "doc",
     "test": "tests"

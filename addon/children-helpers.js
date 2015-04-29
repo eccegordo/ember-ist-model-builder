@@ -50,6 +50,21 @@ export function forEachWait(array, actionFunction, index) {
 
 
 
+// export function deepSaveArray(items) {
+//   var finalSaveRsvp = new Ember.RSVP.Promise(function(finalSaveResolve) {
+//     var saveRsvps = [];
+//     items.forEach(function(dataSource){
+//       saveRsvps.push( dataSource.deepSave() );
+//     });// foreach new source
+    
+//     Ember.RSVP.all(saveRsvps).then(function () {
+//       finalSaveResolve(items);
+//     });
+//   });// end allSaveRsvp
+  
+//   return finalSaveRsvp;
+// }
+
 export function deepSaveArray(items) {
   var finalSaveRsvp = new Ember.RSVP.Promise(function(finalSaveResolve) {
     var saveRsvps = [];
@@ -277,9 +292,12 @@ export default function IstModelChildrenHelpers(modelConfig) {
     }, 'everyChildAssociation ' + self); // end rsvp
     return rsvp;
   };//end everyChildAssociation
-
   
+  //  TODO: Can't do hasOne because it's belongs to and will need to save
+  //        the child first.
   // Save yourself, then save all of your hasMany or hasOne relationships
+  // TODO: I think there might be a bug where this only works one level deep.
+  // It wont wait for a the child's child's parent to be saved.
   newModel.deepSave = function () {
     var self = this;
     var childSaveRsvps = Ember.A();
@@ -287,31 +305,57 @@ export default function IstModelChildrenHelpers(modelConfig) {
     var finalSaveRsvp = new Ember.RSVP.Promise(function(finalSaveResolve) {
       // Save your self
       self.save().then(function (savedSelf) {
-        console.log("self has been saved.");
         // Then get children
         savedSelf.get('childAssociations').then(function (childAssociations) {
           // Keep a list of children we are saving.
           childAssociations.forEach(function (childAssoc) {
-            var p;// See if deepSave is available, push the save promise onto childSaveRsvps
-            if (childAssoc.object.deepSave){
-              p = childAssoc.object.deepSave();
-            } else {
-              p = childAssoc.object.save();
+            if (childAssoc.level === 0){return;}// skip self. already saved
+            if (childAssoc.level === 1){
+              if (childAssoc.object.deepSave){
+                // create recursion where it will save itself, wait, then save level 1 children.
+                childSaveRsvps.pushObject( childAssoc.object.deepSave() );
+              }else{
+                // support non model builder models
+                childSaveRsvps.pushObject( childAssoc.object.save() );
+              }
             }
-            childSaveRsvps.pushObject(p);
           });
           
           // Wait for all children to be saved, then do final resolve
-          Ember.RSVP.all(childSaveRsvps, 'Save all dataDimensions').then(function () {
-            console.log("all children have been saved.!");
-            finalSaveResolve();
+          Ember.RSVP.all(childSaveRsvps, 'deepSave').then(function () {
+            //console.log("all children have been saved.!");
+            finalSaveResolve(self);
           });
           
         });// end get childAssociations
       });// end self seave
-
+      
     });
     return finalSaveRsvp;
+  };
+  
+  
+  // Save yourself, then save all of your hasMany or hasOne relationships
+  newModel.deepDestroy = function () {
+    var self       = this;
+    var childRsvps = Ember.A();
+    
+    var finalRsvp = new Ember.RSVP.Promise(function(finalResolve) {
+      self.get('childAssociations').then(function (childAssociations) {
+        // Delete the children first.
+        var reverseChildAssociations = childAssociations.reverse();
+        reverseChildAssociations.forEach(function (childAssoc) {
+          childRsvps.pushObject( childAssoc.object.destroyRecord() );
+        });
+        
+        // Wait for all children to be saved, then do final resolve
+        Ember.RSVP.all(childRsvps, 'deepDestroy').then(function () {
+          finalResolve();
+        });
+        
+      });// end get childAssociations
+    });
+    return finalRsvp;
   };
   
   

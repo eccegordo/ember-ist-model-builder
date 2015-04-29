@@ -1,11 +1,7 @@
 import Ember                    from 'ember';
 import DS                       from 'ember-data';
-import IstModelChildrenHelpers  from 'ember-ist-model-builder/children-helpers';
-import IstModelDisplayHelpers   from 'ember-ist-model-builder/display-helpers';
-import IstModelEditiableFields  from 'ember-ist-model-builder/editable-fields';
-import IstModelArchive          from 'ember-ist-model-builder/archive';
 
-export default function IstModelBase(modelConfig) {
+var IstModelBase = function(modelConfig) {
   var newModel = {
     modelConfig: modelConfig,// Stash this so we can use it later    
     
@@ -85,16 +81,11 @@ export default function IstModelBase(modelConfig) {
     
   }// end each attr
   
+  return newModel;
   
-  
-  return Ember.$.extend(
-    newModel,
-    new IstModelDisplayHelpers(modelConfig),
-    new IstModelEditiableFields(modelConfig),
-    new IstModelArchive(modelConfig),
-    
-    
-    new IstModelChildrenHelpers(modelConfig)
-  );
-  //return newModel;
 }// end export function
+
+
+
+
+export default IstModelBase;
