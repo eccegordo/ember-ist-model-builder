@@ -90,7 +90,7 @@ function IstModelDisplayHelpers(modelConfig) {
       var self  = this;
       var attrs = this.attributeNamesForDisplayGroup(displayGroup);
       var out   = attrs.map(function (attrName) {
-        return Ember.Object.extend({
+        var attrObj = Ember.Object.extend({
           title:          Ember.computed.alias('model.' + attrName + 'Title'),
           value:          Ember.computed.alias('model.' + attrName),
           valueFormatted: Ember.computed.alias('model.' + attrName + 'Formatted'),
@@ -100,6 +100,10 @@ function IstModelDisplayHelpers(modelConfig) {
           attrName: attrName,
           model:    self,
         });
+        attrObj.toString = function(){
+          return this.get('attrName');
+        }
+        return attrObj;
       });
       return Ember.A(out);
     },

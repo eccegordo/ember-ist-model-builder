@@ -180,7 +180,7 @@ export default {
   name: 'ist-model-builder',
   initialize: function(container, app) {
     // List of fields you never want shown in the app
-    IstModelDisplayHelpers.alwaysHiddenFields.concat([
+    IstModelDisplayHelpers.alwaysHiddenFields = IstModelDisplayHelpers.alwaysHiddenFields.concat([
       'status',
       'createdAt',
       'updatedAt',
