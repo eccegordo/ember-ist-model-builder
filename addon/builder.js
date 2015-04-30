@@ -37,7 +37,7 @@ IstModelBuilder.defaultMixins = [
   IstModelDisplayHelpers,
   IstModelEditableFields,
   IstModelArchive,
-  IstModelChildrenHelpers,
+  IstModelChildrenHelpers
 ];
 
 

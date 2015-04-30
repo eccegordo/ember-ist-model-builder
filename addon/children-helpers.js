@@ -89,7 +89,7 @@ export default function IstModelChildrenHelpers(modelConfig) {
     forEachWait: forEachWait,
     
     processChildNames: function (model, callback, childNames, level) {
-      var self = this;// this referes to 'helpers'
+      var helpers = this;// this referes to 'helpers'
       
       return new Ember.RSVP.Promise(function(processChildNamesResolve) {
         var loopRsvp = forEachWait(childNames, function (childName) {
@@ -110,7 +110,7 @@ export default function IstModelChildrenHelpers(modelConfig) {
                 }
               };
               
-              self.processFoundChildren(foundChildren, callback, childMeta).then(function () {
+              helpers.processFoundChildren(foundChildren, callback, childMeta).then(function () {
                 innerChildNameResolve();
               });
             });

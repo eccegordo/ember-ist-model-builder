@@ -53,6 +53,9 @@ export default IstModelBuilder({
     // Using hasOne helps determine how to use this property
     // for display and saving.
     address: {hasOne: "address"},
+   
+    // can turn visibility off if the value is null or empty string.
+    allergies: {hideIfBlank: true}
     
   },// end attributes
   
