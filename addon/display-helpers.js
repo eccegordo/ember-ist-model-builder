@@ -40,8 +40,9 @@ function IstModelDisplayHelpers(modelConfig) {
       if (typeof groups === 'string'){groups = [groups];}// ensure it's an array.
       
       var definedAttributes = self.get('definedAttributes');
+      
+      // See if we are using a decoratorModel, add those attributes to our list too.
       if (self.modelConfig.decoratorModel && self.get('proxyKind') ) {
-        // Since it may or may not be loaded, just use a blank object
         var content = self.get('content');
         if (content){
           definedAttributes = definedAttributes.concat(content.get('definedAttributes'));
@@ -50,8 +51,6 @@ function IstModelDisplayHelpers(modelConfig) {
       
       definedAttributes.forEach(function (attrName) {
         if (attrName === undefined){return;}
-        if (IstModelDisplayHelpers.alwaysHiddenFields.indexOf(attrName) > -1){return;}
-        
         groups.forEach(function (group) {
           if (typeof self.get(attrName + 'DisplayGroups') === 'object' && self.get(attrName + 'DisplayGroups').indexOf(group) === -1) {
             return;
@@ -183,9 +182,8 @@ function IstModelDisplayHelpers(modelConfig) {
     newModel[attrName + "Unit"] = attrConfig.unit;
     
     
-    // Build the array of display groups.
-    // Set default to default and export if none specified.
-    var groups = IstModelDisplayHelpers.defaultDisplayGroups;
+    // Build the array of display groups. Dupe the array so it doesn't mutate original
+    var groups = IstModelDisplayHelpers.defaultDisplayGroups.slice(0);
     
     if(modelConfig.defaultDisplayGroups) {
       groups = modelConfig.defaultDisplayGroups.slice(0);
@@ -217,7 +215,7 @@ function IstModelDisplayHelpers(modelConfig) {
     if (attrConfig.displayGroups !== undefined){
       groups = attrConfig.displayGroups;
     }
-
+    
     // Merge in any groups to include
     if (attrConfig.displayGroupsInclude !== undefined){
       groups = groups.concat(attrConfig.displayGroupsInclude);
@@ -234,7 +232,7 @@ function IstModelDisplayHelpers(modelConfig) {
     
     allDisplayGroupNames = allDisplayGroupNames.concat(groups);
     newModel[attrName + "DisplayGroups"] = groups;
-
+    
     // Add formatting helper - ie, fooFormatted
     // Adds the passed in formatting function.
     // Default is to just to return the value.
