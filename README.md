@@ -134,11 +134,13 @@ the array is the same order as they were defined in the model.
 
 The association descriptor object has these properties:
 * `.object` - Contains the actual child itself.
-* `.title` which came from the parent's hasMany/hasOne definition.
+* `.parent` - Where the object came from.
+* `.title` - The title from the parent's hasMany/hasOne definition.
 * `.level` - How many levels off association have been traversed.
 * `.collection` - The collection of children the association came from if it was a hasMany relationship.
 * `.displayGroups` - The displayGroups that were defined on that hasMany/hasOne relationship.
-* `.inDisplayGroup()` function so you can see if that association is in a particular display group.
+* `.inFooDisplayGroup` - Chekcs the display groups defined on the assocation.
+* `.inDisplayGroup('foo')` - function so you can see if that association is in a particular display group.
 
 ##### everyChildAssociations()
 Same as `.childAssociations` but does a callback whenever a child has finished loading.

@@ -13,6 +13,7 @@ export default IstModelBuilder({
   attributes: {
     // Basic attr definition - Append summary to the display groups.
     name:   {type:'string', defaultValue: '', displayGroupsInclude: ['summary', 'print']},
+    school: {belongsTo: "school"},
     
     // Default type is raw, defaultValue is null. Can also exclude from a default group
     notes:  {displayGroupsExclude: ['print']},

@@ -9,6 +9,7 @@ import DS    from 'ember-data';
 // so that you know when the whole array has been processed.
 export function forEachWait(array, actionFunction, index) {
   var rsvpName = '';
+  if (array.get === undefined){array = Ember.A(array);}// convert to ember array if not one already
   if (array.length && array.length > 0){
     rsvpName = 'forEachPromise ' + array.get('firstObject').constructor + ' size: '  + array.length;
   }else{
@@ -81,6 +82,54 @@ export function deepSaveArray(items) {
 }
 
 
+export var AssociationDescriptor = Ember.Object.extend({
+  attrName:      null,// attr name on parent
+  object:        null,// the child
+  parent:        null,// the parent
+  collection:    null,// collection child is from
+  level:         0,
+  
+  // Get title from the config where the relationship was defined.
+  title: Ember.computed('parent', 'attrName', function () {
+    var attrName = this.get('attrName');
+    var parent = this.get('parent');
+    if (parent === null){return '';}
+    return parent.get(attrName + 'Title');
+  }),
+  
+  // Get display groups from the config where the relationship was defined.
+  displayGroups: Ember.computed('parent', 'attrName', function () {
+    var attrName = this.get('attrName');
+    var parent = this.get('parent');
+    if (parent === null){return [];}
+    return parent.get(attrName + 'DisplayGroups');
+  }),
+  
+  // This adds support for `inDefaultDisplayGroup` and `inFooDisplayGroup`
+  unknownProperty: function (key) {
+    var matches = key.match(/in([a-zA-Z0-9]+)DisplayGroup/);
+    if (matches){
+      var displayGroup = matches[1].substr(0, 1).toLowerCase() + matches[1].substr(1);
+      return this.inDisplayGroup(displayGroup);
+    }else {
+      return this._super(arguments);
+    }
+  },
+  
+  // Always report being in a display group for level zero
+  // since there is no way for a display group to be defined
+  // for a level zero association.
+  inDisplayGroup: function(displayGroup){
+    var level = this.get('level');
+    if(level === 0 || this.get('displayGroups').indexOf(displayGroup) > -1){
+      return true;
+    }
+    return false;
+  },
+  
+});
+
+
 // These are helpers for looping over child objects
 export default function IstModelChildrenHelpers(modelConfig) {
   var newModel = {};
@@ -97,18 +146,13 @@ export default function IstModelChildrenHelpers(modelConfig) {
             
             var childRsvp = model.get(childName);
             childRsvp.then(function (foundChildren) {
-              var childMeta = {
+              var childMeta = AssociationDescriptor.create({
+                attrName:      childName,
                 object:        null,// Will set later
                 collection:    foundChildren,
                 level:         level,
-                title:         model.get(childName + 'Title'),
-                displayGroups: model.get(childName + 'DisplayGroups'),
-                inDisplayGroup: function(displayGroup){
-                  if(this.displayGroups === undefined){return true;}
-                  if(this.displayGroups.indexOf(displayGroup) > -1){return true;}
-                  return false;
-                }
-              };
+                parent:        model,
+              });
               
               helpers.processFoundChildren(foundChildren, callback, childMeta).then(function () {
                 innerChildNameResolve();
@@ -146,20 +190,25 @@ export default function IstModelChildrenHelpers(modelConfig) {
         }else if(foundChildren.get('length') === undefined){
           // Child was a hasOne.
           var child = foundChildren;
-          childMeta.object = child;
+          childMeta.set('object', child);
           self.processChild(child, callback, childMeta).then(function () {
             processFoundChildrenResolve();
           });
         } else {
           // Child is a hasMany
           var loopRsvp = forEachWait(foundChildren, function (child) {
-            // return that promise so the loop can wait for it to be done.
             
-            // Dont modify the original childMeta in this loop. Create a new meta object
-            // so you don't overwrite the object property
-            var childMetaObj = Ember.Object.extend(childMeta).create({object: child});
-            var out = self.processChild(child, callback, childMetaObj);
-            return out;
+            // Creat a new object for this child in the has many.
+            var thisChildMeta = AssociationDescriptor.create({
+              object:        child,
+              attrName:      childMeta.get('attrName'),
+              collection:    childMeta.get('collection'),
+              level:         childMeta.get('level'),
+              parent:        childMeta.get('parent'),
+            });
+            
+            // return that promise so the loop can wait for it to be done.
+            return self.processChild(child, callback, thisChildMeta);
           });
           
           loopRsvp.then(function () {
@@ -240,25 +289,19 @@ export default function IstModelChildrenHelpers(modelConfig) {
   
   // Same as .childAssociations() but does a callback whenver
   // a child has finished loading.
-  // TODO: add the display group argument
   newModel.everyChildAssociation = function(callback, childMeta){
     var self = this;
     
     if (childMeta === undefined){
-      childMeta = {
+      childMeta = AssociationDescriptor.extend({
+        title:        Ember.computed.alias('object.displayTitle'),
+        diplayGroups: [],
+      }).create({
+        //attrName:      'self',
         object:        self,
         collection:    [],
         level:         0,
-        title:         self.get('displayTitle'),
-        // A model can't have display groups if it didn't come from a relation.
-        // Where would it have been defined? So let's just put in default.
-        displayGroups: ['default'],
-        inDisplayGroup: function(displayGroup){
-          if(this.displayGroups === undefined){return true;}
-          if(this.displayGroups.indexOf(displayGroup) > -1){return true;}
-          return false;
-        }
-      };
+      });
     } else {
       
     }
@@ -323,7 +366,6 @@ export default function IstModelChildrenHelpers(modelConfig) {
           
           // Wait for all children to be saved, then do final resolve
           Ember.RSVP.all(childSaveRsvps, 'deepSave').then(function () {
-            //console.log("all children have been saved.!");
             finalSaveResolve(self);
           });
           

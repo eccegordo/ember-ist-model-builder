@@ -3,6 +3,7 @@ export default IstModelBuilder({
   typeTitle: 'School',
   
   attributes: {
-    name: {defaultValue: 'Foo Elementary'}
+    name:     {defaultValue: 'Foo Elementary'},
+    students: {hasMany: 'student'}
   }
 });

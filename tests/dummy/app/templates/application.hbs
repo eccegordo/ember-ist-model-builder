@@ -17,7 +17,10 @@
 
 <hr/>
 
-{{#each attr in model.printDisplayAttributes}}
-  {{attr.title}}: {{attr.valueFormatted}}<br/>
+{{#each assoc in model.school.childAssociations}}
+  <h3>{{assoc.title}}</h3>
+  {{#each attr in assoc.object.defaultDisplayAttributes}}
+    {{attr.title}}: {{attr.valueFormatted}}<br/>
+  {{/each}}
 {{/each}}
-
+  
