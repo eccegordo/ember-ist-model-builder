@@ -154,6 +154,31 @@ model.everyChildAssociations(function (assoc) {
 #### childAssociationDidChange
 If you need to be notified whenever a deeply nested relationship has been addded or removed you can observe the `childAssociationDidChange` property. It wont tell you if an attribute changed on a related object however. Use it to get your bindings to update when new relationships are added/removed.
 
+### Decorator `IstModelDecorator`
+If you have a model that provides data to your app but your users need to customize the values you may want to use the `IstModelDecorator`.
+
+```javascript
+import IstModelBuilder from 'your-app/lib/ist-model-builder';
+export default IstModelBuilder({
+  decoratorModel: true,
+  typeTitle: 'Pizza Selection',
+  attributes: {
+    customer:  {belongsTo: 'customer'},
+    pizzaSize: {},
+  }
+});
+
+// in a route or controller
+var cheesePizza    = this.store.find('pizza', params.pizzaId);
+var pizzaSelection = this.store.createRecord('pizza-selection');
+pizzaSelection.set('proxyTo', cheesePizza);
+
+
+pizzaSelection.set('pizzaSize', 'large');
+```
+
+Some additional benefits is that the values of the `proxyTo` is cached inside the decorated model. Should the other model go missing it will still have the orignial data.
+
 
 ### Archive `IstModelArchive`
 Adds a `model.get('archive')` computed property that returns a JSON object that has all the deeply nested relationships attached to it.

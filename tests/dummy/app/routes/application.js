@@ -11,7 +11,18 @@ export default Ember.Route.extend({
     });
     
     school.get('students').pushObject(student);
-    return student;
+
+    var decorated = this.store.createRecord('friend');
+    Ember.run.later(function () {
+      decorated.set('proxyTo', student);      
+    }, 1000);
+
+    
+    return {
+      student: student,
+      school:  school,
+      decorated:  decorated,
+    };
   }
   
   

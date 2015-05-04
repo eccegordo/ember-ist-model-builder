@@ -1,6 +1,52 @@
 import Ember from "ember";
 //import DS from 'ember-data';
 
+export function roundNumber(number, decimals) {
+  if(Math.round(number) === number || decimals === 0){
+    number = Math.round(number);
+  }else{
+    number = Math.round(number * Math.pow(10, decimals)) / Math.pow(10, decimals);
+  }
+  return number;
+}
+
+
+// tries to use i18n large numbers unless it's Safari it just uses english style.
+export function prettyNumber(number, decimals) {
+  if (decimals === undefined){decimals = 2;}
+  // Never round to zero, give at least once decimal
+  if (number > -1 && number < 1 && number !== 0.0 && decimals === 0){
+    decimals = 1;
+  }
+  number = roundNumber(number, decimals);
+  if (!!window.Intl && window.locale){
+    return new window.Intl.NumberFormat(window.locale).format(number);
+  }else{
+    return number + '';
+  }
+}
+
+// Use decimals for the percentage. IE, 50% = 0.5
+// tries to use i18n percent unless it's Safari it just uses english style.
+export function prettyPercent(number, decimals) {
+  if (decimals === undefined){decimals = 0;}
+  if (!!window.Intl && window.locale){
+    return new window.Intl.NumberFormat(window.locale, {style: "percent", minimumFractionDigits: decimals, maximumFractionDigits: decimals}).format(number);
+  } else {
+    number = number * 100;
+    number = roundNumber(number, decimals);
+    return number + '%';
+  }
+}
+
+// Takes a camel case attr name and adds spaces and capitalizes each word.
+export function attrToTitle(attrName){
+  return Ember.String.dasherize(attrName).replace(/-/g, ' ').replace(/\w+/g, function(c){
+    // Look in our special strings, otherwize just upcase the first letter.
+    return (IstModelDisplayHelpers.specialStringTitles[c.toLowerCase()] || Ember.String.capitalize(c.toLowerCase())  );
+  });
+}
+
 function IstModelDisplayHelpers(modelConfig) {
   var newModel = {
     // This is a pretty version of the model name.
@@ -127,42 +173,9 @@ function IstModelDisplayHelpers(modelConfig) {
       return formatted;
     },
     
-    roundNumber: function(number, decimals){
-      if(Math.round(number) === number || decimals === 0){
-        number = Math.round(number);
-      }else{
-        number = Math.round(number * Math.pow(10, decimals)) / Math.pow(10, decimals);
-      }
-      return number;
-    },
-
-    // Use decimals for the percentage. IE, 50% = 0.5
-    // tries to use i18n percent unless it's Safari it just uses english style.
-    prettyPercent: function(number, decimals){
-      if (decimals === undefined){decimals = 0;}
-      if (!!window.Intl && window.locale){
-        return new window.Intl.NumberFormat(window.locale, {style: "percent", minimumFractionDigits: decimals, maximumFractionDigits: decimals}).format(number);
-      } else {
-        number = number * 100;
-        number = this.roundNumber(number, decimals);
-        return number + '%';
-      }
-    },
-    
-    // tries to use i18n large numbers unless it's Safari it just uses english style.
-    prettyNumber: function(number, decimals){
-      if (decimals === undefined){decimals = 2;}
-      // Never round to zero, give at least once decimal
-      if (number > -1 && number < 1 && number !== 0.0 && decimals === 0){
-        decimals = 1;
-      }
-      number = this.roundNumber(number, decimals);
-      if (!!window.Intl && window.locale){
-        return new window.Intl.NumberFormat(window.locale).format(number);
-      }else{
-        return number + '';
-      }
-    },
+    roundNumber: roundNumber,
+    prettyPercent: prettyPercent,
+    prettyNumber: prettyNumber,
     
   };// end obj
   
@@ -250,13 +263,7 @@ IstModelDisplayHelpers.specialStringTitles = {
   'ui':    'UI',
 };
 
-// Takes a camel case attr name and adds spaces and capitalizes each word.
-export function attrToTitle(attrName){
-  return Ember.String.dasherize(attrName).replace(/-/g, ' ').replace(/\w+/g, function(c){
-    // Look in our special strings, otherwize just upcase the first letter.
-    return (IstModelDisplayHelpers.specialStringTitles[c.toLowerCase()] || Ember.String.capitalize(c.toLowerCase())  );
-  });
-}
+
 
 // Takes the defaults for the app, merges with the defaults for the
 // model, and merges that with the specific attr config
@@ -313,7 +320,6 @@ export function displayGroupsForAttrFromConfig(modelConfig, attrName){
   
   return groups;
 }// end displayGroupsForAttrFromConfig
-
 
 
 export default IstModelDisplayHelpers;

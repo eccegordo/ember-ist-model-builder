@@ -1,18 +1,18 @@
-<h1 id="title">ember-ist-model-builder</h1>
+<h1 id="title">ember-ist-model.student-builder</h1>
 <hr/>
 
-<h3>{{model.typeTitlePlural}}</h3>
+<h3>{{model.student.typeTitlePlural}}</h3>
 <p>
-  <strong>{{model.displayTitle}}</strong><br/>
+  <strong>{{model.student.displayTitle}}</strong><br/>
   
-  {{model.nameTitle}}:
-  {{model.nameFormatted}}<br/>
+  {{model.student.nameTitle}}:
+  {{model.student.nameFormatted}}<br/>
   
-  {{model.ageTitle}} ({{model.ageUnit}}):
-  {{model.age}}<br/>
+  {{model.student.ageTitle}} ({{model.student.ageUnit}}):
+  {{model.student.age}}<br/>
   
-  {{model.dogYearsTitle}}:
-  {{model.dogYearsFormatted}} {{model.dogYearsUnit}}<br/>
+  {{model.student.dogYearsTitle}}:
+  {{model.student.dogYearsFormatted}} {{model.student.dogYearsUnit}}<br/>
 </p>
 
 <hr/>
@@ -24,3 +24,14 @@
   {{/each}}
 {{/each}}
   
+
+
+<hr />
+
+<h1>Decorated</h1>
+Name: {{input type="text" value=model.decorated.name}} [{{model.decorated.name}}]
+<pre>
+  proxyLocalProperties.name = [{{model.decorated.proxyLocalProperties.name}}]<br/>
+  proxyCache.name = [{{model.decorated.proxyCache.name}}]
+</pre>
+

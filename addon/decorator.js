@@ -1,5 +1,6 @@
 import Ember from 'ember';
-import DS from 'ember-data';
+import DS    from 'ember-data';
+
 
 /*
 The IST Model Builder Decorator is an extension to DS.Model
@@ -30,13 +31,16 @@ export default function(newModel) {
   // Add a place for us to store modified proxy properties locally.
   newModel.proxyLocalProperties = DS.attr('raw', {defaultValue: {} });
   
-  return DS.Model.extend(newModel).extend(Ember._ProxyMixin).extend({
+  return DS.Model.extend(newModel).extend({
     fetchFromStore: true,
     proxyTo:        null,// use myModel.set('proxyTo', otherModel);
     
-    // Computed property to give to the ProxyObject
-    content: Ember.computed('proxyId', 'proxyKind', function () {
+    content: Ember.computed('proxyId', 'proxyKind', 'isLoading', function (key, value) {
       var self = this;
+      
+      if (value !== undefined){return value;}// allow setting content when fetch is resolved.
+      if (self.get('isLoading') === true){return null;}//skip if not loaded yet.
+      
       if (self.get('fetchFromStore') && self.get('proxyId') ) {
         return DS.PromiseObject.create({
           promise: new Ember.RSVP.Promise(function(resolve){
@@ -44,9 +48,9 @@ export default function(newModel) {
             finder.then(
               function (found) {
                 self.set('proxyTo', found);// Update the cache to latest version
-                self.set('content', found);
+                Ember.set(self, 'content', found);
                 resolve(found);
-                self.incrementProperty('childAssociationChangeCounter');
+                self.incrementProperty('childAssociationDidChange');
               },
               function () {
                 // return the cached version
@@ -54,7 +58,7 @@ export default function(newModel) {
                 console.warn("Falling back to cached proxy: ", self.get('proxyKind'), self.get('proxyId') );
                 var cachedModel = self.store.createRecord(self.get('proxyKind'), self.get('proxyCache'));
                 resolve(cachedModel);
-                self.incrementProperty('childAssociationChangeCounter');
+                self.incrementProperty('childAssociationDidChange');
               }
             );// end finder.then
           })// end rsvp
@@ -72,13 +76,13 @@ export default function(newModel) {
       
       if(proxy.content && proxy.get("isLoaded") === true) {
         // it's a promise object
-        this.set('proxyKind',  proxy.content.constructor.typeKey.dasherize() );
+        this.set('proxyKind',  Ember.String.dasherize(proxy.content.constructor.typeKey) );
         this.set('proxyTo',    proxy.content);
         this.set('proxyCache', proxy.content);
         
       } else if (proxy.constructor.typeKey) {
         // It's a model
-        this.set('proxyKind',  proxy.constructor.typeKey.dasherize() );
+        this.set('proxyKind',  Ember.String.dasherize(proxy.constructor.typeKey) );
         this.set('proxyTo',    proxy);
         this.set('proxyCache', proxy);
         
@@ -86,29 +90,35 @@ export default function(newModel) {
         // it's a promise
       }
     }),
-
-    // Any unknown property changes will be stored
-    // in `proxyLocalProperties` so that the proxyTo
-    // object remains unchanged.
-    setUnknownProperty: function (key, value) {
-      // Set the asignment key to our special store
-      var localKey = 'proxyLocalProperties.' + key;
-      return this._super(localKey, value);
-    },
-
-    // Pull properties out of `proxyLocalProperties`
-    // if it is in there.
+    
+    // Add a new computed property that will fetch fetch from `proxyLocalProperties`
+    // if the key has been set, or, if setting the property, set it to `proxyLocalProperties`
+    // instead of the proxyTo object. Default value will come from the proxyTo object.
     unknownProperty: function (key) {
       // Check our special store first
-      var localKey = 'proxyLocalProperties.' + key;
-      var value = this.get(localKey);
-      if (value !== undefined){
-        return value;
-      } else {
-        // have it ask the proxy object for a value.
-        return this._super.apply(this, arguments);
-      }
+      var localKey   = 'proxyLocalProperties.' + key;
+      var proxyKey   = 'content.' + key;
+      var localValue = this.get(localKey);
+      var proxyValue = this.get(proxyKey);
+
+      var fnCode = "if(value !== undefined){this.set('"+localKey+"', value); return value;}"+
+          "var v = this.get('"+localKey+"'); "+
+          "if (v !== undefined){return v;}" +
+          "else{return this.get('"+proxyKey+"'); }";
+      
+      this.propertyWillChange(key);
+      Ember.defineProperty(this,
+                           key,
+                           Ember.computed('proxyTo',
+                                          'content',
+                                          new Function('key', 'value', fnCode)
+                                         )
+                          );
+
+      return this.get(key);
+      this.propertyDidChange(key);
     }
+    
     
   });// end extend for decoratorModel
   
