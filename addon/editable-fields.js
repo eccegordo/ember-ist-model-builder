@@ -1,4 +1,5 @@
 import Ember from 'ember';
+import { attrToTitle }        from 'ember-ist-model-builder/display-helpers';
 import IstModelDisplayHelpers from 'ember-ist-model-builder/display-helpers';
 
 export default function() {
@@ -35,10 +36,16 @@ export default function() {
           valueType         = attrConfig.type;
         }
         
+        if (attrConfig.title) {
+          label = attrConfig.title;
+        } else {
+          label = attrToTitle(attrName);
+        }
+    
         var field = Ember.Object.extend({
           subject:          self,
           attrName:         attrName,
-          label:            Ember.computed.alias('subject.' + attrName + 'Title'),
+          label:            label,
           value:            Ember.computed.alias('subject.' + attrName),
           valueType:        valueType,
           associationModel: associationModel,

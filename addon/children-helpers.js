@@ -335,6 +335,48 @@ export default function IstModelChildrenHelpers(modelConfig) {
     }, 'everyChildAssociation ' + self); // end rsvp
     return rsvp;
   };//end everyChildAssociation
+
+
+  // Enable recursive asynchronous saving of nested models (has many and has one)
+  newModel.deepSaveBelongsTo = function () {
+    var self = this;
+    var childSaveRsvps = Ember.A();
+    var hasManys = this.get('definedHasManyAssociations');
+
+    var finalSaveRsvp = new Ember.RSVP.Promise(function(finalSaveResolve) {
+      // Then get children
+      self.get('childAssociations').then(function (childAssociations) {
+        // Keep a list of children we are saving.
+        childAssociations.forEach(function (childAssoc) {
+          if (childAssoc.level === 0){return;}// skip self. already saved
+          if (hasManys.indexOf(childAssoc.attrName) > -1) {return;}// don't save any hasManys
+
+          if (childAssoc.level === 1){
+            if (childAssoc.object.deepSaveBelongsTo){
+              console.log('SAVING Belongs to =', childAssoc.attrName);
+              // create recursion where it will save itself, wait, then save level 1 children.
+              childSaveRsvps.pushObject( childAssoc.object.deepSaveBelongsTo() );
+            }else{
+              // support non model builder models
+              childSaveRsvps.pushObject( childAssoc.object.save() );
+            }
+          }
+        });
+
+        // Wait for all children to be saved, then do final resolve
+        Ember.RSVP.all(childSaveRsvps, 'deepSaveBelongsTo').then(function () {
+          console.log("all children have been saved.!");
+          self.save().then(function(savedSelf){
+            finalSaveResolve(savedSelf);
+          });
+        });
+
+      });// end get childAssociations
+
+    });
+    return finalSaveRsvp;
+  };
+  
   
   //  TODO: Can't do hasOne because it's belongs to and will need to save
   //        the child first.
