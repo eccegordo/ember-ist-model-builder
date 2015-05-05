@@ -4,7 +4,7 @@ import IstModelDisplayHelpers from 'ember-ist-model-builder/display-helpers';
 
 export function editableFieldsFor(object){
   var attrConfigs;
-  var attrs;
+  var attrs, label;
   var fields = Ember.A();
 
   if (object.get && object.get('modelConfig') !== undefined){
@@ -20,7 +20,7 @@ export function editableFieldsFor(object){
     if(IstModelDisplayHelpers.alwaysHiddenFields.indexOf(attrName) > -1){continue;}
 
     // pull out the attribute configuration for the one we are working on
-    var attrConfig = modelConfigs[attrName];
+    var attrConfig = attrConfigs[attrName];
     var valueType        = 'raw';
     var associationModel = null;// which model the belongsTo or hasMany is refering to.
     if (attrConfig === undefined){attrConfig = {};}
