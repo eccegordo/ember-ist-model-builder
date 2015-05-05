@@ -7,7 +7,7 @@ export function editableFieldsFor(object){
   var attrs;
   var fields = Ember.A();
 
-  if (object.get && objet.get('modelConfig') !== undefined){
+  if (object.get && object.get('modelConfig') !== undefined){
     attrConfigs = object.get('modelConfig').attributes;
     attrs       = Ember.keys(attrConfigs);
   } else {
