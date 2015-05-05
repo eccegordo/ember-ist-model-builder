@@ -47,6 +47,64 @@ export function attrToTitle(attrName){
   });
 }
 
+
+// Takes the defaults for the app, merges with the defaults for the
+// model, and merges that with the specific attr config
+export function displayGroupsForAttrFromConfig(modelConfig, attrName){
+  var attrConfig = (modelConfig.attributes || {})[attrName];
+    
+  // Build the array of display groups. Dupe the array so it doesn't mutate original
+  var groups = IstModelDisplayHelpers.defaultDisplayGroups.slice(0);
+  
+  if(modelConfig.defaultDisplayGroups) {
+    groups = modelConfig.defaultDisplayGroups.slice(0);
+  } else if (IstModelDisplayHelpers.alwaysHiddenFields.indexOf(attrName) > -1){
+    groups = [];// default to no groups so it doesn't show up.
+  }
+  
+  // Add any to include
+  if(modelConfig.defaultDisplayGroupsInclude) {
+    groups = groups.concat(modelConfig.defaultDisplayGroupsInclude);
+  }
+  
+  // Remove any to exclude
+  if(modelConfig.defaultDisplayGroupsExclude) {
+    modelConfig.defaultDisplayGroupsExclude.forEach(function (e) {
+      if (groups.indexOf(e) > -1) {
+        groups.splice(groups.indexOf(e), 1);
+      }
+    });
+  }
+  
+  // Now pull the groups out of the specific attr settings
+  // If user set displayGroup = 'foo' then override all other settings.
+  if (attrConfig.displayGroup !== undefined){ // if it's a string.
+    groups = [attrConfig.displayGroup];
+  }
+  
+  // Allow passing an array too.
+  if (attrConfig.displayGroups !== undefined){
+    groups = attrConfig.displayGroups;
+  }
+  
+  // Merge in any groups to include
+  if (attrConfig.displayGroupsInclude !== undefined){
+    groups = groups.concat(attrConfig.displayGroupsInclude);
+  }
+  
+  // Remove any needed to exclude
+  if (attrConfig.displayGroupsExclude !== undefined){
+    attrConfig.displayGroupsExclude.forEach(function (e) {
+      if (groups.indexOf(e) > -1) {
+        groups.splice(groups.indexOf(e), 1);
+      }
+    });
+  }
+  
+  return groups;
+}// end displayGroupsForAttrFromConfig
+
+
 function IstModelDisplayHelpers(modelConfig) {
   var newModel = {
     // This is a pretty version of the model name.
@@ -129,6 +187,10 @@ function IstModelDisplayHelpers(modelConfig) {
       
       return results;
     },
+
+    displayGroupsForAttr: function(attrName){
+      return displayGroupsForAttrFromConfig(this.modelConfig, attrName);
+    },
     
     // Returns a new object for each attribute in a display group
     // that will have a standard interface for getting title, formatted, unit, etc.
@@ -200,7 +262,9 @@ function IstModelDisplayHelpers(modelConfig) {
 
     var groups = displayGroupsForAttrFromConfig(modelConfig, attrName);
     allDisplayGroupNames = allDisplayGroupNames.concat(groups);
-    newModel[attrName + "DisplayGroups"] = groups;
+    newModel[attrName + "DisplayGroups"] = Ember.computed(attrName, new Function(
+      "return this.displayGroupsForAttr('"+attrName+"');"
+    ));
     
     // Add formatting helper - ie, fooFormatted
     // Adds the passed in formatting function.
@@ -264,62 +328,6 @@ IstModelDisplayHelpers.specialStringTitles = {
 };
 
 
-
-// Takes the defaults for the app, merges with the defaults for the
-// model, and merges that with the specific attr config
-export function displayGroupsForAttrFromConfig(modelConfig, attrName){
-  var attrConfig = (modelConfig.attributes || {})[attrName];
-    
-  // Build the array of display groups. Dupe the array so it doesn't mutate original
-  var groups = IstModelDisplayHelpers.defaultDisplayGroups.slice(0);
-  
-  if(modelConfig.defaultDisplayGroups) {
-    groups = modelConfig.defaultDisplayGroups.slice(0);
-  } else if (IstModelDisplayHelpers.alwaysHiddenFields.indexOf(attrName) > -1){
-    groups = [];// default to no groups so it doesn't show up.
-  }
-  
-  // Add any to include
-  if(modelConfig.defaultDisplayGroupsInclude) {
-    groups = groups.concat(modelConfig.defaultDisplayGroupsInclude);
-  }
-  
-  // Remove any to exclude
-  if(modelConfig.defaultDisplayGroupsExclude) {
-    modelConfig.defaultDisplayGroupsExclude.forEach(function (e) {
-      if (groups.indexOf(e) > -1) {
-        groups.splice(groups.indexOf(e), 1);
-      }
-    });
-  }
-  
-  // Now pull the groups out of the specific attr settings
-  // If user set displayGroup = 'foo' then override all other settings.
-  if (attrConfig.displayGroup !== undefined){ // if it's a string.
-    groups = [attrConfig.displayGroup];
-  }
-  
-  // Allow passing an array too.
-  if (attrConfig.displayGroups !== undefined){
-    groups = attrConfig.displayGroups;
-  }
-  
-  // Merge in any groups to include
-  if (attrConfig.displayGroupsInclude !== undefined){
-    groups = groups.concat(attrConfig.displayGroupsInclude);
-  }
-  
-  // Remove any needed to exclude
-  if (attrConfig.displayGroupsExclude !== undefined){
-    attrConfig.displayGroupsExclude.forEach(function (e) {
-      if (groups.indexOf(e) > -1) {
-        groups.splice(groups.indexOf(e), 1);
-      }
-    });
-  }
-  
-  return groups;
-}// end displayGroupsForAttrFromConfig
 
 
 export default IstModelDisplayHelpers;
