@@ -55,6 +55,8 @@ export function editableFieldsFor(object){
       attrName:         attrName,
       label:            label,
       value:            Ember.computed.alias('subject.' + attrName),
+      unit:             Ember.computed.alias('subject.' + attrName + 'Unit'),
+      valueFormatted:   Ember.computed.alias('subject.' + attrName + 'Formatted'),
       valueType:        valueType,
       associationModel: associationModel,
     }).create();
