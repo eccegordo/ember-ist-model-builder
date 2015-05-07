@@ -57,8 +57,24 @@ export function editableFieldsFor(object){
       value:            Ember.computed.alias('subject.' + attrName),
       unit:             Ember.computed.alias('subject.' + attrName + 'Unit'),
       valueFormatted:   Ember.computed.alias('subject.' + attrName + 'Formatted'),
-      valueType:        valueType,
       associationModel: associationModel,
+
+      valueType:        valueType,
+      isBelongsTo: Ember.computed('valueType', function(){return this.get('valueType') === 'belongsTo';}),
+      isHasMany:   Ember.computed('valueType', function(){return this.get('valueType') === 'hasMany';}),
+      isHasOne:    Ember.computed('valueType', function(){return this.get('valueType') === 'hasOne';}),
+      isRelationship: Ember.computed('valueType', function(){
+        return this.get('valueType') === 'belongsTo' ||
+          this.get('valueType') === 'hasMany' ||
+          this.get('valueType') === 'hasOne';
+      }),
+      
+      isString:  Ember.computed('valueType', function(){return this.get('valueType') === 'string';}),
+      isNumber:  Ember.computed('valueType', function(){return this.get('valueType') === 'number';}),
+      isBoolean: Ember.computed('valueType', function(){return this.get('valueType') === 'boolean';}),
+      isDate:    Ember.computed('valueType', function(){return this.get('valueType') === 'date';}),
+      isRaw:     Ember.computed('valueType', function(){return this.get('valueType') === 'raw';}),
+      
     }).create();
     
     fields.push(field);

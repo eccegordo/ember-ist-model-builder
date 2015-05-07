@@ -196,6 +196,9 @@ field.get('valueType');// raw, boolean, number, string, hasOne, hasMany, belongs
 field.get('associationModel');// if the attribute is a relationship, this will be the model name suitable for a store.find()
 ```
 
+Other properties: `isBelongsTo` `isHasMany` `isHasOne` `isRelationship` `isString` `isNumber` `isBoolean` `isDate` `isRaw`
+
+
 ## Customization
 
 Add an initializer to customize the model builder.
