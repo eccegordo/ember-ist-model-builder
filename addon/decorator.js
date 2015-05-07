@@ -71,6 +71,14 @@ export default function(newModel) {
     
     updateProxyId: Ember.observer('proxyTo', 'proxyTo.isLoaded', function () {
       var proxy = this.get('proxyTo');
+      
+      if (Ember.isBlank(proxy) ) {
+        this.set('proxyId',    null);
+        this.set('proxyKind',  null);
+        this.set('proxyCache', null);
+        return;
+      }
+      
       this.set('fetchFromStore', false);
       this.set('proxyId', proxy.get('id') );
       
