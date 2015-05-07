@@ -51,15 +51,10 @@ export function editableFieldsFor(object){
     }
     
     var field = Ember.Object.extend({
-      subject:          object,
-      attrName:         attrName,
-      label:            label,
       value:            Ember.computed.alias('subject.' + attrName),
       unit:             Ember.computed.alias('subject.' + attrName + 'Unit'),
       valueFormatted:   Ember.computed.alias('subject.' + attrName + 'Formatted'),
-      associationModel: associationModel,
-
-      valueType:        valueType,
+      
       isBelongsTo: Ember.computed('valueType', function(){return this.get('valueType') === 'belongsTo';}),
       isHasMany:   Ember.computed('valueType', function(){return this.get('valueType') === 'hasMany';}),
       isHasOne:    Ember.computed('valueType', function(){return this.get('valueType') === 'hasOne';}),
@@ -75,7 +70,13 @@ export function editableFieldsFor(object){
       isDate:    Ember.computed('valueType', function(){return this.get('valueType') === 'date';}),
       isRaw:     Ember.computed('valueType', function(){return this.get('valueType') === 'raw';}),
       
-    }).create();
+    }).create({
+      subject:          object,
+      attrName:         attrName,
+      label:            label,
+      valueType:        valueType,
+      associationModel: associationModel,
+    });
     
     fields.push(field);
   }
