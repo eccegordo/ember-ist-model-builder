@@ -16,7 +16,7 @@ var removeBeforeObserver = Ember.removeBeforeObserver;
 var propertyWillChange  = Ember.propertyWillChange;
 var propertyDidChange   = Ember.propertyDidChange;
 var computed            = Ember.computed;
-//var defineProperty      = Ember.defineProperty;
+var defineProperty      = Ember.defineProperty;
 var Mixin               = Ember.Mixin;
 //var observer            = Ember.Observer;
 
@@ -88,6 +88,7 @@ export default Mixin.create({
     var content = this.firstContentWithProperty(key);
     if (Ember.isBlank(content)){
       // set on this object if can't find it on contents.
+      defineProperty(this, key, null, value);
       return set(this, key, value);
     } else {
       return set(content, key, value);
