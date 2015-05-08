@@ -40,14 +40,21 @@ Name: {{input type="text" value=model.decorated.name}} [{{model.decorated.name}}
 
 <hr />
 <h1>Editable Fields:</h1>
-{{#each field in model.student.editableFields}}
+{{#each field in model.fieldsToEdit}}
   <label>{{field.label}}</label>
   {{input type="text" value=field.value }}<br />
-  
 {{/each}}
   
 
 <hr />
 <h1>Chain:</h1>
-Name: {{model.chain.name}}<br/>
-Age: {{model.chain.age}}  
+<p>
+  Name: {{model.chain.name}}<br/>
+  Age: {{model.chain.age}}<br/>
+  School Name: {{model.chain.schoolName}}
+</p>
+
+
+
+
+

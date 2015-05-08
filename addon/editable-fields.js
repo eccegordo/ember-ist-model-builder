@@ -1,6 +1,37 @@
 import Ember from 'ember';
 import { attrToTitle }        from 'ember-ist-model-builder/display-helpers';
 import IstModelDisplayHelpers from 'ember-ist-model-builder/display-helpers';
+import ChainedProxyMixin      from 'ember-ist-model-builder/chained-proxy-mixin';
+
+
+// Implements chained proxy so we can have default settings and custom settings.
+// Call `fieldSetting.applyCustomSettings({label: "Other label"})` to override defaults.
+export var EditableFieldSettingsManager = Ember.Object.extend(ChainedProxyMixin, {
+  applyCustomSettings: function (settings) {
+    this.contents.unshift(settings);
+  },
+  
+});
+
+export var EditableFieldSettingsObject = Ember.Object.extend({
+  isBelongsTo: Ember.computed('valueType', function(){return this.get('valueType') === 'belongsTo';}),
+  isHasMany:   Ember.computed('valueType', function(){return this.get('valueType') === 'hasMany';}),
+  isHasOne:    Ember.computed('valueType', function(){return this.get('valueType') === 'hasOne';}),
+  isRelationship: Ember.computed('valueType', function(){
+    return this.get('valueType') === 'belongsTo' ||
+      this.get('valueType') === 'hasMany' ||
+      this.get('valueType') === 'hasOne';
+  }),
+  
+  isString:  Ember.computed('valueType', function(){return this.get('valueType') === 'string';}),
+  isNumber:  Ember.computed('valueType', function(){return this.get('valueType') === 'number';}),
+  isBoolean: Ember.computed('valueType', function(){return this.get('valueType') === 'boolean';}),
+  isDate:    Ember.computed('valueType', function(){return this.get('valueType') === 'date';}),
+  isRaw:     Ember.computed('valueType', function(){return this.get('valueType') === 'raw';}),
+  
+});
+
+
 
 export function editableFieldsFor(object){
   var attrConfigs;
@@ -49,25 +80,10 @@ export function editableFieldsFor(object){
       label = attrToTitle(attrName);
     }
     
-    var field = Ember.Object.extend({
+    var defaultSettings = EditableFieldSettingsObject.extend({
       value:            Ember.computed.alias('subject.' + attrName),
       unit:             Ember.computed.alias('subject.' + attrName + 'Unit'),
       valueFormatted:   Ember.computed.alias('subject.' + attrName + 'Formatted'),
-      
-      isBelongsTo: Ember.computed('valueType', function(){return this.get('valueType') === 'belongsTo';}),
-      isHasMany:   Ember.computed('valueType', function(){return this.get('valueType') === 'hasMany';}),
-      isHasOne:    Ember.computed('valueType', function(){return this.get('valueType') === 'hasOne';}),
-      isRelationship: Ember.computed('valueType', function(){
-        return this.get('valueType') === 'belongsTo' ||
-          this.get('valueType') === 'hasMany' ||
-          this.get('valueType') === 'hasOne';
-      }),
-      
-      isString:  Ember.computed('valueType', function(){return this.get('valueType') === 'string';}),
-      isNumber:  Ember.computed('valueType', function(){return this.get('valueType') === 'number';}),
-      isBoolean: Ember.computed('valueType', function(){return this.get('valueType') === 'boolean';}),
-      isDate:    Ember.computed('valueType', function(){return this.get('valueType') === 'date';}),
-      isRaw:     Ember.computed('valueType', function(){return this.get('valueType') === 'raw';}),
       
     }).create({
       subject:          object,
@@ -76,8 +92,12 @@ export function editableFieldsFor(object){
       valueType:        valueType,
       associationModel: associationModel,
     });
+
+    var manager = EditableFieldSettingsManager.create({
+      contents: [defaultSettings]
+    });
     
-    fields.push(field);
+    fields.push(manager);
   }
   return fields;
 }

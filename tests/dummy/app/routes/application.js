@@ -1,17 +1,8 @@
 import Ember from 'ember';
-import ChainedProxy from 'dummy/lib/chained-proxy';
+import ChainedProxyMixin from 'dummy/lib/chained-proxy-mixin';
 
 export default Ember.Route.extend({
   model: function () {
-    var chain = Ember.Object.extend(ChainedProxy).create({
-      contents: [
-        {name: 'first'},
-        {name: 'second', age: 33},
-        
-      ]
-    });
-    
-    
     var school = this.store.createRecord('school');
     var student = this.store.createRecord('student', {
       school: school,
@@ -26,13 +17,35 @@ export default Ember.Route.extend({
     Ember.run.later(function () {
       decorated.set('proxyTo', student);      
     }, 1000);
-
+    
+    
+    var chain = Ember.Object.extend(ChainedProxyMixin).create({
+      contents: [
+        Ember.Object.create({
+          name: "Don",
+        }),
+        Ember.Object.create({
+          age: 66,
+          school: Ember.Object.create({name: 'Foo Heights'}),
+          schoolName: Ember.computed.alias("school.name")
+        }),
+      ]
+    });
+    
+    var fieldsToEdit = student.get('editableFields');
+    fieldsToEdit.objectAt(0).applyCustomSettings({
+      label: "Student's Name: " 
+    });
     
     return {
       student: student,
       school:  school,
       decorated:  decorated,
       chain: chain,
+      
+      fieldsToEdit: fieldsToEdit,
+      
+      
     };
   }
   
