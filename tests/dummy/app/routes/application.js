@@ -1,7 +1,17 @@
 import Ember from 'ember';
+import ChainedProxy from 'dummy/lib/chained-proxy';
 
 export default Ember.Route.extend({
   model: function () {
+    var chain = Ember.Object.extend(ChainedProxy).create({
+      contents: [
+        {name: 'first'},
+        {name: 'second', age: 33},
+        
+      ]
+    });
+    
+    
     var school = this.store.createRecord('school');
     var student = this.store.createRecord('student', {
       school: school,
@@ -22,6 +32,7 @@ export default Ember.Route.extend({
       student: student,
       school:  school,
       decorated:  decorated,
+      chain: chain,
     };
   }
   

@@ -35,3 +35,19 @@ Name: {{input type="text" value=model.decorated.name}} [{{model.decorated.name}}
   proxyCache.name = [{{model.decorated.proxyCache.name}}]
 </pre>
 
+
+
+
+<hr />
+<h1>Editable Fields:</h1>
+{{#each field in model.student.editableFields}}
+  <label>{{field.label}}</label>
+  {{input type="text" value=field.value }}<br />
+  
+{{/each}}
+  
+
+<hr />
+<h1>Chain:</h1>
+Name: {{model.chain.name}}<br/>
+Age: {{model.chain.age}}  
