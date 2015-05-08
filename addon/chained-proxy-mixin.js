@@ -56,8 +56,6 @@ export default Mixin.create({
   _debugContainerKey: null,
   
   willWatchProperty: function (key) {
-    var index = this.indexOfFirstContentWithProperty(key);
-
     // Always watch the array of contents for additions.
     var contentKey = 'contents.@each.' + key;
     addBeforeObserver(this, contentKey, null, contentPropertyWillChange);
@@ -66,12 +64,9 @@ export default Mixin.create({
   },
   
   didUnwatchProperty: function (key) {
-    var index = this.indexOfFirstContentWithProperty(key);
-    
     var contentKey = 'contents.@each.' + key;
     removeBeforeObserver(this, contentKey, null, contentPropertyWillChange);
     removeObserver(this, contentKey, null, contentPropertyDidChange);
-    
   },
   
   unknownProperty: function (key) {
