@@ -210,7 +210,7 @@ function IstModelDisplayHelpers(modelConfig) {
         });
         attrObj.toString = function(){
           return this.get('attrName');
-        }
+        };
         return attrObj;
       });
       return Ember.A(out);

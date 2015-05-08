@@ -5,20 +5,20 @@
 
 import Ember from "ember"; // Ember.assert
 
-var get                 = Ember.get;
-var set                 = Ember.set;
-var addObserver         = Ember.addObserver;
-var removeObserver      = Ember.removeObserver;
-var addBeforeObserver   = Ember.addBeforeObserver;
-var removeBeforeObserve = Ember.removeBeforeObserve;
+var get                  = Ember.get;
+var set                  = Ember.set;
+var addObserver          = Ember.addObserver;
+var removeObserver       = Ember.removeObserver;
+var addBeforeObserver    = Ember.addBeforeObserver;
+var removeBeforeObserver = Ember.removeBeforeObserver;
 
 
 var propertyWillChange  = Ember.propertyWillChange;
 var propertyDidChange   = Ember.propertyDidChange;
 var computed            = Ember.computed;
-var defineProperty      = Ember.defineProperty;
+//var defineProperty      = Ember.defineProperty;
 var Mixin               = Ember.Mixin;
-var observer            = Ember.Observer;
+//var observer            = Ember.Observer;
 
 
 function contentPropertyWillChange(content, contentKey) {
@@ -33,13 +33,7 @@ function contentPropertyDidChange(content, contentKey) {
   propertyDidChange(this, key);
 }
 
-/**
-  `Ember.ProxyMixin` forwards all properties not defined by the proxy itself
-  to a proxied `content` object.  See Ember.ObjectProxy for more details.
 
-  @class ProxyMixin
-  @namespace Ember
-*/
 export default Mixin.create({
     /**
     The object whose properties will be forwarded.

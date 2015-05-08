@@ -3,7 +3,6 @@ import { attrToTitle }        from 'ember-ist-model-builder/display-helpers';
 import IstModelDisplayHelpers from 'ember-ist-model-builder/display-helpers';
 
 export function editableFieldsFor(object){
-  var self = this;
   var attrConfigs;
   var attrs, label;
   var fields = Ember.A();

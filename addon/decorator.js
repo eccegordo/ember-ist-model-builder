@@ -23,7 +23,6 @@ export default function(newModel) {
     return;
   }
   
-  var modelConfig = newModel.modelConfig;
   newModel.proxyCache = DS.attr('raw');
   newModel.proxyKind  = DS.attr('string');
   newModel.proxyId    = DS.attr('string');
@@ -106,15 +105,12 @@ export default function(newModel) {
       // Check our special store first
       var localKey   = 'proxyLocalProperties.' + key;
       var proxyKey   = 'content.' + key;
-      var localValue = this.get(localKey);
-      var proxyValue = this.get(proxyKey);
-
+      
       var fnCode = "if(value !== undefined){this.set('"+localKey+"', value); return value;}"+
           "var v = this.get('"+localKey+"'); "+
           "if (v !== undefined){return v;}" +
           "else{return this.get('"+proxyKey+"'); }";
       
-      this.propertyWillChange(key);
       Ember.defineProperty(this,
                            key,
                            Ember.computed('proxyTo',
@@ -124,7 +120,6 @@ export default function(newModel) {
                           );
 
       return this.get(key);
-      this.propertyDidChange(key);
     }
     
     
