@@ -8,7 +8,7 @@ import ChainedProxyMixin      from 'ember-ist-model-builder/chained-proxy-mixin'
 // Call `fieldSetting.applyCustomSettings({label: "Other label"})` to override defaults.
 export var EditableFieldSettingsManager = Ember.Object.extend(ChainedProxyMixin, {
   applyCustomSettings: function (settings) {
-    this.contents.unshift(settings);
+    this.contents.unshiftObjects([settings]);
   },
   
 });
@@ -94,7 +94,7 @@ export function editableFieldsFor(object){
     });
 
     var manager = EditableFieldSettingsManager.create({
-      contents: [defaultSettings]
+      contents: Ember.A([defaultSettings])// make sure ember array so binding works properly
     });
     
     fields.push(manager);

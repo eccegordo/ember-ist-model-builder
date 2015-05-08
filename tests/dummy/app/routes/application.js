@@ -20,17 +20,26 @@ export default Ember.Route.extend({
     
     
     var chain = Ember.Object.extend(ChainedProxyMixin).create({
-      contents: [
+      contents: Ember.A([
         Ember.Object.create({
           name: "Don",
         }),
-        Ember.Object.create({
-          age: 66,
-          school: Ember.Object.create({name: 'Foo Heights'}),
-          schoolName: Ember.computed.alias("school.name")
-        }),
-      ]
+        
+      ])
     });
+
+    var secondChainItem = Ember.Object.create({
+      age: 66,
+      school: Ember.Object.create({name: 'Foo Heights'}),
+      schoolName: Ember.computed.alias("school.name")
+    });
+
+    // Delay setting so we can make sure the push binding works
+    Ember.run.later(function () {
+      chain.get('contents').pushObject(secondChainItem);
+    }, 2000);
+    
+    
     
     var fieldsToEdit = student.get('editableFields');
     fieldsToEdit.objectAt(0).applyCustomSettings({
@@ -44,7 +53,8 @@ export default Ember.Route.extend({
       chain: chain,
       
       fieldsToEdit: fieldsToEdit,
-      
+
+      secondChainItem: secondChainItem,
       
     };
   }
