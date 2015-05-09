@@ -187,7 +187,7 @@ export default function IstModelChildrenHelpers(modelConfig) {
           // I guess the child has no value.
           processFoundChildrenResolve();
           return;
-        }else if(foundChildren.get('length') === undefined){
+        }else if(Ember.isBlank(foundChildren.get('length')) ){
           // Child was a hasOne.
           var child = foundChildren;
           childMeta.set('object', child);
