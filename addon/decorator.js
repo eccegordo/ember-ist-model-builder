@@ -70,6 +70,7 @@ export default function(newModel) {
     
     updateProxyId: Ember.observer('proxyTo', 'proxyTo.isLoaded', function () {
       var proxy = this.get('proxyTo');
+      this.incrementProperty('childAssociationDidChange');
       
       if (Ember.isBlank(proxy) ) {
         this.set('proxyId',    null);

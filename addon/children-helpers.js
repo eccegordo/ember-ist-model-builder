@@ -408,7 +408,7 @@ export default function IstModelChildrenHelpers(modelConfig) {
           
           childAssociations.forEach(function (childAssoc) {
             if (childAssoc.level === 0){return;}// skip self. already saved
-            if (hasManys.indexOf(childAssoc.attrName) == -1) {return;}// don't save belongs to.
+            if (hasManys.indexOf(childAssoc.attrName) === -1) {return;}// don't save belongs to.
             
             if (childAssoc.level === 1){
               if (childAssoc.object.deepSaveHasMany){
@@ -473,7 +473,11 @@ export default function IstModelChildrenHelpers(modelConfig) {
       childPropsToWatch.push(attrName + '.@each.childAssociationDidChange');
     }
   }//end foreach
-  
+
+
+  childPropsToWatch.push(function(){
+    this.incrementProperty('childAssociationDidChange');
+  });
   
   // Wrap childPropsToWatch in quotes and join together
   // to make somethign we can pass to .property() in an eval.
@@ -488,9 +492,7 @@ export default function IstModelChildrenHelpers(modelConfig) {
   // It wont tell us if any attributes way down in the 
   // nest have been changed.
   newModel.childAssociationDidChange = 0;
-  newModel.childAssocationChangeObserver = Ember.observer(childPropsToWatch, function(){
-    this.incrementProperty('childAssociationDidChange');
-  });
+  newModel.childAssocationChangeObserver = Ember.observer.apply(newModel, childPropsToWatch);
   
   
   //propsToObserve = "newModel.childAssocationChangeObserver.observes("+propsToObserve+")";
