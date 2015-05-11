@@ -32,7 +32,6 @@ export default function(newModel) {
   
   return DS.Model.extend(newModel).extend({
     fetchFromStore: true,
-    proxyTo:        null,// use myModel.set('proxyTo', otherModel);
     
     content: Ember.computed('proxyId', 'proxyKind', 'isLoading', function (key, value) {
       var self = this;
@@ -68,15 +67,19 @@ export default function(newModel) {
       }
     }),
     
-    updateProxyId: Ember.observer('proxyTo', 'proxyTo.isLoaded', function () {
-      var proxy = this.get('proxyTo');
+    proxyTo: Ember.computed(function (key, value) {
+      if (value !== undefined) {
+        return this.get('content');
+      }
+      
+      var proxy = value;
       this.incrementProperty('childAssociationDidChange');
       
       if (Ember.isBlank(proxy) ) {
         this.set('proxyId',    null);
         this.set('proxyKind',  null);
         this.set('proxyCache', null);
-        return;
+        return value;
       }
       
       this.set('fetchFromStore', false);
@@ -97,6 +100,7 @@ export default function(newModel) {
       }else{
         // it's a promise
       }
+      
     }),
     
     // Add a new computed property that will fetch fetch from `proxyLocalProperties`
