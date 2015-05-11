@@ -100,7 +100,7 @@ export default function(newModel) {
       }else{
         // it's a promise
       }
-      
+      return value;
     }),
     
     // Add a new computed property that will fetch fetch from `proxyLocalProperties`
