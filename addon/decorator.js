@@ -71,11 +71,11 @@ export default function(newModel) {
       if (value === undefined && !Ember.isBlank(this.get('proxyId')) ) {
         // getting the value...
         return this.get('content');
-      } else {
-        // no value set if no ID
+      } else if (value === undefined) {
+        // Getting but NULL value set because no ID
         return null;
       }
-
+      
       // Setting the value...
       
       var proxy = value;
@@ -99,7 +99,7 @@ export default function(newModel) {
         
       } else if (proxy.constructor.typeKey) {
         // It's a model
-        this.set('proxyKind',  Ember.String.dasherize(proxy.constructor.typeKey) );
+        this.set('proxyKind', Ember.String.dasherize(proxy.constructor.typeKey) );
         this.set('proxyCache', proxy);
         
       }else{
