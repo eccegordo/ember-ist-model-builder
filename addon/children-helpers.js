@@ -335,8 +335,21 @@ export default function IstModelChildrenHelpers(modelConfig) {
     }, 'everyChildAssociation ' + self); // end rsvp
     return rsvp;
   };//end everyChildAssociation
-
-
+  
+  
+  // When saving, you need to save belongsTo first so that
+  // they have an ID to store. After they have all been save,
+  // then you can save your self and the hasManys.
+  newModel.deepSave = function () {
+    return new Ember.RSVP.Promise(function(finalSaveResolve) {
+      this.deepSaveBelongsTo().then(function (saved) {
+        saved.deepSaveHasMany().then(function (savedAgain) {
+          finalSaveResolve(savedAgain);
+        });
+      });
+    });
+  };
+  
   // In order to save a model all the belongTo relationships need
   // to have an ID set. This function saves all the belongsTo
   // relationships then saves itself.
