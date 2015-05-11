@@ -68,9 +68,12 @@ export default function(newModel) {
     }),
     
     proxyTo: Ember.computed(function (key, value) {
-      if (value === undefined) {
+      if (value === undefined && !Ember.isBlank(self.get('proxyId')) ) {
         // getting the value...
         return this.get('content');
+      } else {
+        // no value set if no ID
+        return null;
       }
 
       // Setting the value...
