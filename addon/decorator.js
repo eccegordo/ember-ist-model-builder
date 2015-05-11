@@ -68,9 +68,12 @@ export default function(newModel) {
     }),
     
     proxyTo: Ember.computed(function (key, value) {
-      if (value !== undefined) {
+      if (value === undefined) {
+        // getting the value...
         return this.get('content');
       }
+
+      // Setting the value...
       
       var proxy = value;
       this.incrementProperty('childAssociationDidChange');
@@ -88,19 +91,18 @@ export default function(newModel) {
       if(proxy.content && proxy.get("isLoaded") === true) {
         // it's a promise object
         this.set('proxyKind',  Ember.String.dasherize(proxy.content.constructor.typeKey) );
-        this.set('proxyTo',    proxy.content);
         this.set('proxyCache', proxy.content);
+        proxy = proxy.content;
         
       } else if (proxy.constructor.typeKey) {
         // It's a model
         this.set('proxyKind',  Ember.String.dasherize(proxy.constructor.typeKey) );
-        this.set('proxyTo',    proxy);
         this.set('proxyCache', proxy);
         
       }else{
         // it's a promise
       }
-      return value;
+      return proxy;
     }),
     
     // Add a new computed property that will fetch fetch from `proxyLocalProperties`
