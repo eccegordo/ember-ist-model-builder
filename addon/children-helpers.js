@@ -49,38 +49,21 @@ export function forEachWait(array, actionFunction, index) {
   
 }
 
-
-
-// export function deepSaveArray(items) {
-//   var finalSaveRsvp = new Ember.RSVP.Promise(function(finalSaveResolve) {
-//     var saveRsvps = [];
-//     items.forEach(function(dataSource){
-//       saveRsvps.push( dataSource.deepSave() );
-//     });// foreach new source
+export function deepSaveArray(items) {
+  var finalSaveRsvp = new Ember.RSVP.Promise(function(finalSaveResolve) {
+    var saveRsvps = [];
+    var item;
+    for(var i = 0; item = items[i]; i++){
+      saveRsvps.push( item.deepSave() );
+    }
     
-//     Ember.RSVP.all(saveRsvps).then(function () {
-//       finalSaveResolve(items);
-//     });
-//   });// end allSaveRsvp
+    Ember.RSVP.all(saveRsvps).then(function () {
+      finalSaveResolve(items);
+    });
+  });// end allSaveRsvp
   
-//   return finalSaveRsvp;
-// }
-
-// export function deepSaveArray(items) {
-//   var finalSaveRsvp = new Ember.RSVP.Promise(function(finalSaveResolve) {
-//     var saveRsvps = [];
-//     items.forEach(function(dataSource){
-//       saveRsvps.push( dataSource.deepSave() );
-//     });// foreach new source
-    
-//     Ember.RSVP.all(saveRsvps).then(function () {
-//       finalSaveResolve(items);
-//     });
-//   });// end allSaveRsvp
-  
-//   return finalSaveRsvp;
-// }
-
+  return finalSaveRsvp;
+}
 
 export var AssociationDescriptor = Ember.Object.extend({
   attrName:      null,// attr name on parent
@@ -341,8 +324,9 @@ export default function IstModelChildrenHelpers(modelConfig) {
   // they have an ID to store. After they have all been save,
   // then you can save your self and the hasManys.
   newModel.deepSave = function () {
+    var self = this;
     return new Ember.RSVP.Promise(function(finalSaveResolve) {
-      this.deepSaveBelongsTo().then(function (saved) {
+      self.deepSaveBelongsTo().then(function (saved) {
         saved.deepSaveHasMany().then(function (savedAgain) {
           finalSaveResolve(savedAgain);
         });
