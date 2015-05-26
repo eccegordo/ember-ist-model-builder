@@ -81,12 +81,12 @@ export function editableFieldsFor(object){
     }
     
     var defaultSettings = EditableFieldSettingsObject.extend({
-      value:            Ember.computed.alias('subject.' + attrName),
-      unit:             Ember.computed.alias('subject.' + attrName + 'Unit'),
-      valueFormatted:   Ember.computed.alias('subject.' + attrName + 'Formatted'),
+      value:            Ember.computed.alias('model.' + attrName),
+      unit:             Ember.computed.alias('model.' + attrName + 'Unit'),
+      valueFormatted:   Ember.computed.alias('model.' + attrName + 'Formatted'),
       
     }).create({
-      subject:          object,
+      model:            object,
       attrName:         attrName,
       label:            label,
       valueType:        valueType,
