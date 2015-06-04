@@ -33,10 +33,8 @@ export default function(newModel) {
   return DS.Model.extend(newModel).extend({
     fetchFromStore: true,
     
-    content: Ember.computed('proxyId', 'proxyKind', 'isLoading', function (key, value) {
+    content: Ember.computed('proxyId', 'proxyKind', 'isLoading', function () {
       var self = this;
-      
-      if (value !== undefined){return value;}// allow setting content when fetch is resolved.
       if (self.get('isLoading') === true){return null;}//skip if not loaded yet.
       
       if (self.get('fetchFromStore') && self.get('proxyId') ) {
@@ -67,46 +65,48 @@ export default function(newModel) {
       }
     }),
     
-    proxyTo: Ember.computed(function (key, value) {
-      if (value === undefined && !Ember.isBlank(this.get('proxyId')) ) {
-        // getting the value...
-        return this.get('content');
-      } else if (value === undefined) {
-        // Getting but NULL value set because no ID
-        return null;
-      }
+    proxyTo: Ember.computed({
+      get() {
+        if (!Ember.isBlank(this.get('proxyId')) ) {
+          // getting the value...
+          return this.get('content');
+        } else {
+          // Getting but NULL value set because no ID
+          return null;
+        }
+      },
       
-      // Setting the value...
-      
-      var proxy = value;
-      this.incrementProperty('childAssociationDidChange');
-      
-      if (Ember.isBlank(proxy) ) {
-        this.set('proxyId',    null);
-        this.set('proxyKind',  null);
-        this.set('proxyCache', null);
-        return value;
-      }
-      
-      this.set('fetchFromStore', false);
-      this.set('proxyId', proxy.get('id') );
-      
-      if(proxy.content && proxy.get("isLoaded") === true) {
-        // it's a promise object
-        this.set('proxyKind',  Ember.String.dasherize(proxy.content.constructor.typeKey) );
-        this.set('proxyCache', proxy.content);
-        proxy = proxy.content;
+      set(key, value) {
+        var proxy = value;
+        this.incrementProperty('childAssociationDidChange');
         
-      } else if (proxy.constructor.typeKey) {
-        // It's a model
-        this.set('proxyKind', Ember.String.dasherize(proxy.constructor.typeKey) );
-        this.set('proxyCache', proxy);
+        if (Ember.isBlank(proxy) ) {
+          this.set('proxyId',    null);
+          this.set('proxyKind',  null);
+          this.set('proxyCache', null);
+          return value;
+        }
         
-      }else{
-        // it's a promise
-      }
-      return proxy;
-    }),
+        this.set('fetchFromStore', false);
+        this.set('proxyId', proxy.get('id') );
+        
+        if(proxy.content && proxy.get("isLoaded") === true) {
+          // it's a promise object
+          this.set('proxyKind',  Ember.String.dasherize(proxy.content.constructor.typeKey) );
+          this.set('proxyCache', proxy.content);
+          proxy = proxy.content;
+          
+        } else if (proxy.constructor.typeKey) {
+          // It's a model
+          this.set('proxyKind', Ember.String.dasherize(proxy.constructor.typeKey) );
+          this.set('proxyCache', proxy);
+          
+        }else{
+          // it's a promise
+        }
+        return proxy;
+      }// end setter
+    ),
     
     // Add a new computed property that will fetch fetch from `proxyLocalProperties`
     // if the key has been set, or, if setting the property, set it to `proxyLocalProperties`
