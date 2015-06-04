@@ -241,8 +241,7 @@ export default function IstModelChildrenHelpers(modelConfig) {
   // There is also a inDisplayGroup() function so you can see if that association
   // is in a particular display group.
   // Note, the first item this returns is the model itself
-  newModel.childAssociations = Ember.computed('childAssociationDidChange', function(key, value){
-    if(value !== undefined){return value;}// skip computing if setting
+  newModel.childAssociations = Ember.computed('childAssociationDidChange', function(){
     var self = this;
     var out = Ember.A([]);
     var finalResolve;
