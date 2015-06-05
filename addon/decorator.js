@@ -92,13 +92,13 @@ export default function(newModel) {
         
         if(proxy.content && proxy.get("isLoaded") === true) {
           // it's a promise object
-          this.set('proxyKind',  Ember.String.dasherize(proxy.content.constructor.typeKey) );
+          this.set('proxyKind',  proxy.content.constructor.modelName );
           this.set('proxyCache', proxy.content);
           proxy = proxy.content;
           
-        } else if (proxy.constructor.typeKey) {
+        } else if (proxy.constructor.modelName) {
           // It's a model
-          this.set('proxyKind', Ember.String.dasherize(proxy.constructor.typeKey) );
+          this.set('proxyKind', proxy.constructor.modelName );
           this.set('proxyCache', proxy);
           
         }else{
@@ -106,7 +106,7 @@ export default function(newModel) {
         }
         return proxy;
       }// end setter
-    ),
+    }),
     
     // Add a new computed property that will fetch fetch from `proxyLocalProperties`
     // if the key has been set, or, if setting the property, set it to `proxyLocalProperties`
@@ -116,8 +116,7 @@ export default function(newModel) {
       var localKey   = 'proxyLocalProperties.' + key;
       var proxyKey   = 'content.' + key;
       
-      var fnCode = "if(value !== undefined){this.set('"+localKey+"', value); return value;}"+
-          "var v = this.get('"+localKey+"'); "+
+      var fnCode = "var v = this.get('"+localKey+"'); "+
           "if (v !== undefined){return v;}" +
           "else{return this.get('"+proxyKey+"'); }";
       
@@ -125,7 +124,7 @@ export default function(newModel) {
                            key,
                            Ember.computed('proxyTo',
                                           'content',
-                                          new Function('key', 'value', fnCode)
+                                          new Function(fnCode)
                                          )
                           );
 
