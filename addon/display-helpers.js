@@ -58,8 +58,6 @@ export function displayGroupsForAttrFromConfig(modelConfig, attrName){
   
   if(modelConfig.defaultDisplayGroups) {
     groups = modelConfig.defaultDisplayGroups.slice(0);
-  } else if (IstModelDisplayHelpers.alwaysHiddenFields.indexOf(attrName) > -1){
-    groups = [];// default to no groups so it doesn't show up.
   }
   
   // Add any to include
@@ -74,6 +72,11 @@ export function displayGroupsForAttrFromConfig(modelConfig, attrName){
         groups.splice(groups.indexOf(e), 1);
       }
     });
+  }
+  
+  // Always enfoce alwaysHiddenFields so they don't show up... Unless specificly set by attrConfig.displayGroup
+  if (IstModelDisplayHelpers.alwaysHiddenFields.indexOf(attrName) > -1){
+    groups = [];
   }
   
   // Now pull the groups out of the specific attr settings
