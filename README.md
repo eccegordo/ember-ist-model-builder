@@ -189,6 +189,7 @@ Adds a `model.get('editableFields')` computed property that returns an array of 
 
 ```javascript
 // Field descriptor object:
+field.get('model'); // the object itself
 field.get('attrName');
 field.get('label');// comes from the title
 field.get('value');// live binded to the model's value
@@ -265,3 +266,12 @@ export default IstModelBuilder({
   }
 });
 ```
+
+
+
+# Development
+To use a local copy of this addon in your Ember app,
+checkout the repo, run `npm link ~/ember-ist-model-builder/` in your
+Ember app directory and `npm istall`. Now your app will use your local
+copy. You will need to reboot your Ember server whenver you make a
+change to the addon.
