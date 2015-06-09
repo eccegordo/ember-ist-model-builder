@@ -33,36 +33,39 @@ export default function(newModel) {
   return DS.Model.extend(newModel).extend({
     fetchFromStore: true,
     
-    content: Ember.computed('proxyId', 'proxyKind', 'isLoading', function () {
-      var self = this;
-      if (self.get('isLoading') === true){return null;}//skip if not loaded yet.
-      
-      if (self.get('fetchFromStore') && self.get('proxyId') ) {
-        return DS.PromiseObject.create({
-          promise: new Ember.RSVP.Promise(function(resolve){
-            var finder = self.store.find(self.get('proxyKind'), self.get('proxyId'));
-            finder.then(
-              function (found) {
-                self.set('proxyTo', found);// Update the cache to latest version
-                Ember.set(self, 'content', found);
-                resolve(found);
-                self.incrementProperty('childAssociationDidChange');
-              },
-              function () {
-                // return the cached version
-                // NOTE: This object does not have an ID on it. It will be null
-                console.warn("Falling back to cached proxy: ", self.get('proxyKind'), self.get('proxyId') );
-                var cachedModel = self.store.createRecord(self.get('proxyKind'), self.get('proxyCache'));
-                resolve(cachedModel);
-                self.incrementProperty('childAssociationDidChange');
-              }
-            );// end finder.then
-          })// end rsvp
-        });// end promise object
+    content: Ember.computed('proxyId', 'proxyKind', 'isLoading', {
+      set(key, v){return v;},
+      get () {
+        var self = this;
+        if (self.get('isLoading') === true){return null;}//skip if not loaded yet.
         
-      } else {
-        return this.get('proxyTo');
-      }
+        if (self.get('fetchFromStore') && self.get('proxyId') ) {
+          return DS.PromiseObject.create({
+            promise: new Ember.RSVP.Promise(function(resolve){
+              var finder = self.store.find(self.get('proxyKind'), self.get('proxyId'));
+              finder.then(
+                function (found) {
+                  self.set('proxyTo', found);// Update the cache to latest version
+                  Ember.set(self, 'content', found);
+                  resolve(found);
+                  self.incrementProperty('childAssociationDidChange');
+                },
+                function () {
+                  // return the cached version
+                  // NOTE: This object does not have an ID on it. It will be null
+                  console.warn("Falling back to cached proxy: ", self.get('proxyKind'), self.get('proxyId') );
+                  var cachedModel = self.store.createRecord(self.get('proxyKind'), self.get('proxyCache'));
+                  resolve(cachedModel);
+                  self.incrementProperty('childAssociationDidChange');
+                }
+              );// end finder.then
+            })// end rsvp
+          });// end promise object
+          
+        } else {
+          return this.get('proxyTo');
+        }
+      }// end get
     }),
     
     proxyTo: Ember.computed({
