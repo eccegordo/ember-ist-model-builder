@@ -132,7 +132,7 @@ export default function IstModelChildrenHelpers(modelConfig) {
               var childMeta = AssociationDescriptor.create({
                 attrName:      childName,
                 object:        null,// Will set later
-                collection:    foundChildren,
+                collection:    null,// Will set later if comes from a collection
                 level:         level,
                 parent:        model,
               });
@@ -185,11 +185,10 @@ export default function IstModelChildrenHelpers(modelConfig) {
             var thisChildMeta = AssociationDescriptor.create({
               object:        child,
               attrName:      childMeta.get('attrName'),
-              collection:    childMeta.get('collection'),
+              collection:    foundChildren,
               level:         childMeta.get('level'),
               parent:        childMeta.get('parent'),
             });
-            
             // return that promise so the loop can wait for it to be done.
             return self.processChild(child, callback, thisChildMeta);
           });
