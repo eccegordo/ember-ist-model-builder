@@ -177,7 +177,9 @@ function IstModelDisplayHelpers(modelConfig) {
             attrConfig = self.get('content').modelConfig.attributes[attr];
           }
           
-          if(attrConfig.hideIfBlank && (value === null || value === undefined || value === 0 || value === '')){
+          if(attrConfig.hideIfBlank && Ember.isBlank(value) ||
+             (attrConfig.hideIfBlank && value.valueOf && Ember.isBlank(value.valueOf() ))
+            ){
             return false;
           } else {
             return true;
