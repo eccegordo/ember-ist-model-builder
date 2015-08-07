@@ -15,15 +15,29 @@ export function roundNumber(number, decimals) {
 export function prettyNumber(number, decimals) {
   if (decimals === undefined){decimals = 2;}
   // Never round to zero, give at least once decimal
-  if (number > -1 && number < 1 && number !== 0.0 && decimals === 0){
-    decimals = 1;
+  if (number > -1 && number < 1 && number !== 0.0){
+    if (!!window.Intl && window.locale){
+      return new window.Intl.NumberFormat(window.locale, {maximumSignificantDigits: 2}).format(number);
+    } else {
+      // We'll do it ourselves.
+      var rawNumber = number;
+      do {
+        number = this.roundNumber(rawNumber, decimals);
+        decimals = decimals + 1;
+      } while(number === 0 || number === 0.0);
+
+      return number + '';
+    }
+  } else {
+    number = this.roundNumber(number, decimals);
   }
-  number = roundNumber(number, decimals);
+
   if (!!window.Intl && window.locale){
     return new window.Intl.NumberFormat(window.locale).format(number);
   }else{
     return number + '';
   }
+
 }
 
 // Use decimals for the percentage. IE, 50% = 0.5
@@ -52,19 +66,19 @@ export function attrToTitle(attrName){
 // model, and merges that with the specific attr config
 export function displayGroupsForAttrFromConfig(modelConfig, attrName){
   var attrConfig = (modelConfig.attributes || {})[attrName];
-    
+
   // Build the array of display groups. Dupe the array so it doesn't mutate original
   var groups = IstModelDisplayHelpers.defaultDisplayGroups.slice(0);
-  
+
   if(modelConfig.defaultDisplayGroups) {
     groups = modelConfig.defaultDisplayGroups.slice(0);
   }
-  
+
   // Add any to include
   if(modelConfig.defaultDisplayGroupsInclude) {
     groups = groups.concat(modelConfig.defaultDisplayGroupsInclude);
   }
-  
+
   // Remove any to exclude
   if(modelConfig.defaultDisplayGroupsExclude) {
     modelConfig.defaultDisplayGroupsExclude.forEach(function (e) {
@@ -73,28 +87,28 @@ export function displayGroupsForAttrFromConfig(modelConfig, attrName){
       }
     });
   }
-  
+
   // Always enfoce alwaysHiddenFields so they don't show up... Unless specificly set by attrConfig.displayGroup
   if (IstModelDisplayHelpers.alwaysHiddenFields.indexOf(attrName) > -1){
     groups = [];
   }
-  
+
   // Now pull the groups out of the specific attr settings
   // If user set displayGroup = 'foo' then override all other settings.
   if (attrConfig.displayGroup !== undefined){ // if it's a string.
     groups = [attrConfig.displayGroup];
   }
-  
+
   // Allow passing an array too.
   if (attrConfig.displayGroups !== undefined){
     groups = attrConfig.displayGroups;
   }
-  
+
   // Merge in any groups to include
   if (attrConfig.displayGroupsInclude !== undefined){
     groups = groups.concat(attrConfig.displayGroupsInclude);
   }
-  
+
   // Remove any needed to exclude
   if (attrConfig.displayGroupsExclude !== undefined){
     attrConfig.displayGroupsExclude.forEach(function (e) {
@@ -103,7 +117,7 @@ export function displayGroupsForAttrFromConfig(modelConfig, attrName){
       }
     });
   }
-  
+
   return groups;
 }// end displayGroupsForAttrFromConfig
 
@@ -123,13 +137,13 @@ function IstModelDisplayHelpers(modelConfig) {
     typeTitlePlural: Ember.computed('typeTitle', function(){
       return Ember.Inflector.inflector.pluralize(this.get('typeTitle'));
     }),
-    
+
     // Default title will be the type title plus name or title attribute, if defined.
     displayTitle: Ember.computed('typeTitle', 'name', 'title', function () {
       var name = this.get('name');
       var title = this.get('title');
       var typeTitle = this.get('typeTitle');
-      
+
       if (!Ember.isBlank(name)){
         return typeTitle + ': ' + name;
       } else if (!Ember.isBlank(title)){
@@ -138,16 +152,16 @@ function IstModelDisplayHelpers(modelConfig) {
         return typeTitle;
       }
     }),
-    
+
     // Return attrs that have are in a list of display groups.
     // Pass in a string for a single, or an array of groups.
     attributeNamesForDisplayGroup: function (groups) {
       var results = [];
       var self = this;
       if (typeof groups === 'string'){groups = [groups];}// ensure it's an array.
-      
+
       var definedAttributes = self.get('definedAttributes');
-      
+
       // See if we are using a decoratorModel, add those attributes to our list too.
       if (self.modelConfig.decoratorModel && self.get('proxyKind') ) {
         var content = self.get('content');
@@ -155,28 +169,28 @@ function IstModelDisplayHelpers(modelConfig) {
           definedAttributes = definedAttributes.concat(content.get('definedAttributes'));
         }
       }
-      
+
       definedAttributes.forEach(function (attrName) {
         if (attrName === undefined){return;}
         groups.forEach(function (group) {
           if (typeof self.get(attrName + 'DisplayGroups') === 'object' && self.get(attrName + 'DisplayGroups').indexOf(group) === -1) {
             return;
           }
-          
+
           results.push(attrName);
         });
       });
-      
+
       // Remove any that are nil if requested
       results = results.filter(function (attr) {
         try {
           var attrConfig = self.modelConfig.attributes[attr];
           var value = self.get(attr);
-          
+
           if (self.modelConfig.decoratorModel && attrConfig === undefined) {
             attrConfig = self.get('content').modelConfig.attributes[attr];
           }
-          
+
           if(attrConfig.hideIfBlank && Ember.isBlank(value) ||
              (attrConfig.hideIfBlank && value.valueOf && Ember.isBlank(value.valueOf() ))
             ){
@@ -189,14 +203,14 @@ function IstModelDisplayHelpers(modelConfig) {
           return true;
         }
       });
-      
+
       return results;
     },
 
     displayGroupsForAttr: function(attrName){
       return displayGroupsForAttrFromConfig(this.modelConfig, attrName);
     },
-    
+
     // Returns a new object for each attribute in a display group
     // that will have a standard interface for getting title, formatted, unit, etc.
     attributeDescriptorsForDisplayGroup: function (displayGroup) {
@@ -220,7 +234,7 @@ function IstModelDisplayHelpers(modelConfig) {
       });
       return Ember.A(out);
     },
-    
+
     // Round floats, other wize return value with unit attached
     defaultFormatter: function(value, unit){
       var formatted = '';
@@ -233,35 +247,35 @@ function IstModelDisplayHelpers(modelConfig) {
       }else{
         formatted = value.toString();
       }
-      
+
       if (unit !== undefined) {
         formatted = formatted + " " + unit;
       }
       return formatted;
     },
-    
+
     roundNumber: roundNumber,
     prettyPercent: prettyPercent,
     prettyNumber: prettyNumber,
-    
+
   };// end obj
-  
-  
+
+
   // Now configure the new model's attributes
   // Loop through each key in the attr hash and build up the property.
   var allDisplayGroupNames = [];// also keep track of unique display groups
   for(var attrName in (modelConfig.attributes || {}) ){
     // pull out the attribute configuration for the one we are working on
-    var attrConfig = modelConfig.attributes[attrName];  
-    
+    var attrConfig = modelConfig.attributes[attrName];
+
     // --------------- Do Display Attr logic --------------------------
-    
+
     // Set the attrTitle property
     if (attrConfig.title   === undefined) {
       attrConfig.title = attrToTitle(attrName); // Default: turnCamelCase to "Turn Camel Case"
     }
     newModel[attrName + "Title"] = attrConfig.title;
-    
+
     // Set the attrUnit property
     newModel[attrName + "Unit"] = attrConfig.unit;
 
@@ -270,7 +284,7 @@ function IstModelDisplayHelpers(modelConfig) {
     newModel[attrName + "DisplayGroups"] = Ember.computed(attrName, new Function(
       "return this.displayGroupsForAttr('"+attrName+"');"
     ));
-    
+
     // Add formatting helper - ie, fooFormatted
     // Adds the passed in formatting function.
     // Default is to just to return the value.
@@ -278,20 +292,20 @@ function IstModelDisplayHelpers(modelConfig) {
       // Set the formatter so we can get it later.
       // Then in the `fooFormatted` function, pass the value to the formatter.
       newModel[attrName + "Formatter"] = attrConfig.formatter;
-      
+
       newModel[attrName + "Formatted"] = Ember.computed(attrName, new Function(
         "return this." + attrName + "Formatter( this.get('"+attrName+"'), this.get('"+attrName+"Unit') ) "
       ));
-      
+
     } else {
       // just return the value
       newModel[attrName + "Formatted"] = Ember.computed(attrName, new Function(
         "return this.defaultFormatter(this.get('"+attrName+"'), this.get('"+attrName+"Unit') ) "
       ));
     }
-    
+
   }// end foreach attr in modelConfig
-  
+
   // Add a ____DisplayAttributes property for each display group.
   allDisplayGroupNames = Ember.A(allDisplayGroupNames).uniq();
   for(var i = 0; i < allDisplayGroupNames.length; i++){
@@ -300,7 +314,7 @@ function IstModelDisplayHelpers(modelConfig) {
       "return this.attributeDescriptorsForDisplayGroup('"+displayGroup+"') "
     ));
   }// end for loop
-  
+
   return newModel;
 }// end export function
 
