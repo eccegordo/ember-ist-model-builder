@@ -2,6 +2,7 @@ import Ember from "ember";
 //import DS from 'ember-data';
 
 export function roundNumber(number, decimals) {
+  number = number.valueOf();// make sure it's the real number.
   if(Math.round(number) === number || decimals === 0){
     number = Math.round(number);
   }else{
@@ -13,6 +14,7 @@ export function roundNumber(number, decimals) {
 
 // tries to use i18n large numbers unless it's Safari it just uses english style.
 export function prettyNumber(number, decimals) {
+  number = number.valueOf();// make sure it's the real number.
   if (decimals === undefined){decimals = 2;}
   // Never round to zero, give at least once decimal
   if (number > -1 && number < 1 && number !== 0.0){
@@ -43,6 +45,7 @@ export function prettyNumber(number, decimals) {
 // Use decimals for the percentage. IE, 50% = 0.5
 // tries to use i18n percent unless it's Safari it just uses english style.
 export function prettyPercent(number, decimals) {
+  number = number.valueOf();// make sure it's the real number.
   if (decimals === undefined){decimals = 0;}
   if (!!window.Intl && window.locale){
     return new window.Intl.NumberFormat(window.locale, {style: "percent", minimumFractionDigits: decimals, maximumFractionDigits: decimals}).format(number);
