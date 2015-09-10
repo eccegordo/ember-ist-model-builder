@@ -322,7 +322,7 @@ function IstModelDisplayHelpers(modelConfig) {
   allDisplayGroupNames = Ember.A(allDisplayGroupNames).uniq();
   for(var i = 0; i < allDisplayGroupNames.length; i++){
     var displayGroup = allDisplayGroupNames[i];
-    newModel[displayGroup + "DisplayAttributes"] = Ember.computed('definedAttributes.@each', new Function(
+    newModel[displayGroup + "DisplayAttributes"] = Ember.computed('definedAttributes.[]', new Function(
       "return this.attributeDescriptorsForDisplayGroup('"+displayGroup+"') "
     ));
   }// end for loop
