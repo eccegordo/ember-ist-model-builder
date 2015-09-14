@@ -7,17 +7,9 @@ import Ember from "ember"; // Ember.assert
 
 const {get, set, isBlank} = Ember;
 const {addObserver, removeObserver} = Ember;
-const {addBeforeObserver, removeBeforeObserver} = Ember;
-const {propertyWillChange, propertyDidChange} = Ember;
+const {propertyDidChange} = Ember;
 const {computed, defineProperty, Mixin} = Ember;
 
-
-function contentPropertyWillChange(content, contentKey) {
-  // find out the original getter key.
-  var key = contentKey.replace(/contents\.[a-zA-Z0-9@_]+\./, '');
-  if (key in this) { return; }  // if shadowed in proxy
-  propertyWillChange(this, key);
-}
 
 function contentPropertyDidChange(content, contentKey) {
   var key = contentKey.replace(/contents\.[a-zA-Z0-9@_]+\./, '');
