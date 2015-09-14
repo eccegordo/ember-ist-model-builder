@@ -11,8 +11,6 @@ const {addBeforeObserver, removeBeforeObserver} = Ember;
 const {propertyWillChange, propertyDidChange} = Ember;
 const {computed, defineProperty, Mixin} = Ember;
 
-// TODO fix the deprecations for addBeforeObserver and removeBeforeObserver
-// http://emberjs.com/deprecations/v1.x/#toc_beforeobserver
 
 function contentPropertyWillChange(content, contentKey) {
   // find out the original getter key.
@@ -51,14 +49,12 @@ export default Mixin.create({
   willWatchProperty: function (key) {
     // Always watch the array of contents for additions.
     var contentKey = 'contents.@each.' + key;
-    addBeforeObserver(this, contentKey, null, contentPropertyWillChange);
     addObserver(this, contentKey, null, contentPropertyDidChange);
 
   },
 
   didUnwatchProperty: function (key) {
     var contentKey = 'contents.@each.' + key;
-    removeBeforeObserver(this, contentKey, null, contentPropertyWillChange);
     removeObserver(this, contentKey, null, contentPropertyDidChange);
   },
 
