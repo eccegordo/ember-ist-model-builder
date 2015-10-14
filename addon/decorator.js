@@ -40,12 +40,18 @@ export default function(newModel) {
         if (self.get('isLoading') === true){return null;}//skip if not loaded yet.
 
         if (self.get('fetchFromStore') && self.get('proxyId') ) {
+          // NOTE: This object does not have an ID on it. It will be null
+          //       It is used as a stub while the data is being fetched.
+          //       Computed properties should work.
+          var cachedModel = self.store.createRecord(self.get('proxyKind'), self.get('proxyCache'));
+
           return DS.PromiseObject.create({
-            content: self.get('proxyCache'),// use cache until we can get fetch data.
+            content: cachedModel,
             promise: new Ember.RSVP.Promise(function(resolve){
               var finder = self.store.find(self.get('proxyKind'), self.get('proxyId'));
               finder.then(
                 function (found) {
+                  cachedModel.destroyRecord();// clear this temporary model from the store.
                   self.set('proxyTo', found);// Update the cache to latest version
                   Ember.set(self, 'content', found);
                   resolve(found);
@@ -53,9 +59,7 @@ export default function(newModel) {
                 },
                 function () {
                   // return the cached version
-                  // NOTE: This object does not have an ID on it. It will be null
                   console.warn("Falling back to cached proxy: ", self.get('proxyKind'), self.get('proxyId') );
-                  var cachedModel = self.store.createRecord(self.get('proxyKind'), self.get('proxyCache'));
                   resolve(cachedModel);
                   self.incrementProperty('childAssociationDidChange');
                 }
