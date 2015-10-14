@@ -39,10 +39,7 @@ export default function(newModel) {
         var self = this;
         if (self.get('isLoading') === true){return null;}//skip if not loaded yet.
 
-
         if (self.get('fetchFromStore') && self.get('proxyId') ) {
-
-
           // NOTE: This object does not have an ID on it. It will be null
           //       It is used as a stub while the data is being fetched.
           //       Computed properties should work.
