@@ -123,7 +123,7 @@ attrToTitle('fooBarBaz'); // returns 'Foo Bar Baz'
 
 ### Children Helpers `IstModelChildrenHelpers`
 
-##### deeSave()
+##### deepSave()
 `model.deepSave()` will recursively save the model and also any hasOne and hasMany relationships.
 
 ##### childAssociations
@@ -139,7 +139,7 @@ The association descriptor object has these properties:
 * `.level` - How many levels off association have been traversed.
 * `.collection` - The collection of children the association came from if it was a hasMany relationship.
 * `.displayGroups` - The displayGroups that were defined on that hasMany/hasOne relationship.
-* `.inFooDisplayGroup` - Chekcs the display groups defined on the assocation.
+* `.inFooDisplayGroup` - Checks the display groups defined on the assocation.
 * `.inDisplayGroup('foo')` - function so you can see if that association is in a particular display group.
 
 ##### everyChildAssociations()
