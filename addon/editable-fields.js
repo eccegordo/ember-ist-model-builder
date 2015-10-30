@@ -46,7 +46,7 @@ export function editableFieldsFor(object){
     attrs       = Object.keys(attrConfigs);
   } else {
     // if this is a proxy then get the real content so we can get the keys
-    if (object.get && object.get('content') !== undefiend) {
+    if (object.get && object.get('content') !== undefined) {
       object = object.get('content');
     }
 
