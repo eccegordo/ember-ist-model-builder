@@ -42,13 +42,14 @@ export function editableFieldsFor(object){
 
 
   if (object.get && object.get('modelConfig') !== undefined){
-    // if this is a proxy then get the real content so we can get the keys
-    if (object.get('content') !== undefiend) {
-      object = object.get('content');
-    }
     attrConfigs = object.get('modelConfig').attributes;
     attrs       = Object.keys(attrConfigs);
   } else {
+    // if this is a proxy then get the real content so we can get the keys
+    if (object.get && object.get('content') !== undefiend) {
+      object = object.get('content');
+    }
+
     attrConfigs = Object.keys(object);// no configs
     attrs       = Object.keys(object);
   }
