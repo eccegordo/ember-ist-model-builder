@@ -41,6 +41,8 @@ export function editableFieldsFor(object){
   var fields = Ember.A();
 
   if (object.get && object.get('modelConfig') !== undefined){
+    if (object.then){object = object.get('content');}// get the real object out of the promise
+
     attrConfigs = object.get('modelConfig').attributes;
     attrs       = Object.keys(attrConfigs);
   } else {
@@ -56,10 +58,17 @@ export function editableFieldsFor(object){
     var attrConfig = attrConfigs[attrName];
     var valueType        = 'raw';
     var associationModel = null;// which model the belongsTo or hasMany is refering to.
-    if (attrConfig === undefined){attrConfig = {};}
 
-    // Allow configuring to disable editing.
-    if (attrConfig.editable !== undefined && attrConfig.editable === false){
+    // if no attrConfig, set some defaults
+    if (attrConfig === undefined){
+      attrConfig = {
+        editable: true
+      };
+    }
+
+    // Editable = false by default
+    // attrConfig must have editable=true to add field to form
+    if (attrConfig.editable !== true){
       continue;
     }
 
