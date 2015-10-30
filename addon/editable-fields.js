@@ -40,9 +40,12 @@ export function editableFieldsFor(object){
   var attrs, label;
   var fields = Ember.A();
 
-  if (object.then){object = object.get('content');}// get the real object out of the promise
 
   if (object.get && object.get('modelConfig') !== undefined){
+    // if this is a proxy then get the real content so we can get the keys
+    if (object.get('content') !== undefiend) {
+      object = object.get('content');
+    }
     attrConfigs = object.get('modelConfig').attributes;
     attrs       = Object.keys(attrConfigs);
   } else {
