@@ -200,7 +200,10 @@ function IstModelDisplayHelpers(modelConfig) {
           var value = self.get(attr);
 
           if (self.modelConfig.decoratorModel && attrConfig === undefined) {
-            attrConfig = self.get('content').modelConfig.attributes[attr];
+            var proxyModelConfig = self.get('content').modelConfig;
+            if (proxyModelConfig && proxyModelConfig.attributes){
+              attrConfig = proxyModelConfig.attributes[attr];
+            }
           }
 
           if(attrConfig.hideIfBlank && Ember.isBlank(value) ||
