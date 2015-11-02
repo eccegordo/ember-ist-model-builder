@@ -203,6 +203,8 @@ function IstModelDisplayHelpers(modelConfig) {
             var proxyModelConfig = self.get('content').modelConfig;
             if (proxyModelConfig && proxyModelConfig.attributes){
               attrConfig = proxyModelConfig.attributes[attr];
+            } else {
+              attrConfig = {};
             }
           }
 
