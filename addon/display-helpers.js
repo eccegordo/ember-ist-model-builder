@@ -30,14 +30,14 @@ export function prettyNumber(number, decimals) {
       // We'll do it ourselves.
       var rawNumber = number;
       do {
-        number = this.roundNumber(rawNumber, decimals);
+        number = roundNumber(rawNumber, decimals);
         decimals = decimals + 1;
       } while(number === 0 || number === 0.0);
 
       return number + '';
     }
   } else {
-    number = this.roundNumber(number, decimals);
+    number = roundNumber(number, decimals);
   }
 
   if (!!window.Intl && window.locale){
