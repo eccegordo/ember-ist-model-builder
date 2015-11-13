@@ -1,6 +1,5 @@
 # ember-ist-model-builder
 
-
 ## Installation
 * Add `"ember-ist-model-builder": ">=0.1.0",` to your `package.json` file under `devDependencies`.
 * `npm install`
@@ -17,17 +16,17 @@ export default IstModelBuilder({
   defaultDisplayGroups:        ['default'],
   defaultDisplayGroupsInclude: ['print'],
   defaultDisplayGroupsExclude: ['summary'],
-  
+
   // Type title used to label the model in dispay
   typeTitle: "Student",
-  
+
   attributes: {
     // Basic attr definition - Append summary to the display groups.
     name:   {type:'string', defaultValue: '', displayGroupsInclude: ['summary']},
-    
+
     // Default type is raw, defaultValue is null. Can also exclude from a default group
     notes:  {displayGroupsExclude: ['print']},
-    
+
     // Can change the title, set a unit, and custom formatter function
     // Default formatter is the value (rounded if float) plus the unit (if given).
     age: {
@@ -37,7 +36,7 @@ export default IstModelBuilder({
         return value + " " + unit + " old";
       }
     },
-    
+
     // Can also do a computed property by setting value
     dogYears: {
       title: "Age in Dog years",
@@ -45,24 +44,24 @@ export default IstModelBuilder({
         return this.get('age') * 7;
       })
     },
-    
+
     // hasMany works like this:
     friends: {hasMany: "friend"},
-    
+
     // hasOne is supported but maps to DS.belongsTo()
     // Using hasOne helps determine how to use this property
     // for display and saving.
     address: {hasOne: "address"},
-   
+
     // can turn visibility off if the value is null or empty string.
     allergies: {hideIfBlank: true}
-    
+
   },// end attributes
-  
+
 }).extend({
   // You can use .extend() to add any computed properties or functions
   // that don't need to be displayed or have formatters for.
-  
+
 });
 ```
 
@@ -88,8 +87,8 @@ that it is working with. Examples:
 <p>
   {{model.firstNameTitle}}:
   {{model.firstNameFormatted}}<br/>
-  
-  {{model.ageTitle}}: 
+
+  {{model.ageTitle}}:
   {{model.age}} ({{model.ageUnit}}):<br/>
 </p>
 ```
@@ -216,7 +215,7 @@ export default {
       'createdAt',
       'updatedAt',
     ]);
-    
+
     // Strings who have unusual casing. Use lowercase as key.
     IstModelDisplayHelpers.specialStringTitles = {
       'hdd':   "HDD",
