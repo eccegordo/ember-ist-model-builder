@@ -258,7 +258,7 @@ export default function IstModelChildrenHelpers(modelConfig) {
 
     // Push associations on the the promise array's content.
     self.everyChildAssociation(function (assoc) {
-      out.push(assoc);
+      out.pushObject(assoc);
     }).then(function(){
       // report back that we are all done.
       finalResolve(out);
