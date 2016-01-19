@@ -329,7 +329,7 @@ function IstModelDisplayHelpers(modelConfig) {
     var displayGroup = allDisplayGroupNames[i];
     newModel[displayGroup + "DisplayAttributes"] = Ember.computed('definedAttributes.[]', new Function(
       "return this.attributeDescriptorsForDisplayGroup('"+displayGroup+"') "
-    ));
+    )).volatile();
   }// end for loop
 
   return newModel;
