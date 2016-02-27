@@ -1,6 +1,6 @@
 {
   "name": "ember-ist-model-builder",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "description": "Builds enhanced Ember models to help with display, child management, formatting, decorating, and archiving.",
   "bugs": {
     "url": "https://github.com/bdevel/ember-ist-model-builder/issues"
