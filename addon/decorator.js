@@ -28,7 +28,7 @@ export default function(newModel) {
   newModel.proxyId    = DS.attr('string');
 
   // Add a place for us to store modified proxy properties locally.
-  newModel.proxyLocalProperties = DS.attr('raw', {defaultValue: {} });
+  newModel.proxyLocalProperties = DS.attr('raw');
 
   return DS.Model.extend(newModel).extend({
     fetchFromStore: true,
@@ -115,6 +115,17 @@ export default function(newModel) {
         return proxy;
       }// end setter
     }),
+
+    setUnknownProperty: function(key, value){
+      var localKey   = 'proxyLocalProperties.' + key;
+      var localHash  = this.get('proxyLocalProperties');
+      if (Ember.isBlank(localHash)){
+        localHash = {};
+      }
+      localHash[key] = value;
+      this.get('proxyLocalProperties', localHash);
+      return value;
+    },
 
     // Add a new computed property that will fetch fetch from `proxyLocalProperties`
     // if the key has been set, or, if setting the property, set it to `proxyLocalProperties`
