@@ -141,11 +141,11 @@ The association descriptor object has these properties:
 * `.inFooDisplayGroup` - Checks the display groups defined on the assocation.
 * `.inDisplayGroup('foo')` - function so you can see if that association is in a particular display group.
 
-##### everyChildAssociations()
+##### everyChildAssociation()
 Same as `.childAssociations` but does a callback whenever a child has finished loading.
 
 ```javascript
-model.everyChildAssociations(function (assoc) {
+model.everyChildAssociation(function (assoc) {
   console.log("Child: ", assoc.object.get('displayTitle'));
 });
 ```
