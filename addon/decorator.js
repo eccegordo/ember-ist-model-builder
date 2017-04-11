@@ -19,7 +19,7 @@ own settings and properties to it.
 */
 export default function(newModel) {
   if (!Ember.isBlank(newModel.attributes) ){
-    console.error('Arguments for IstModelDecorator is a model config and not an object for DS.Model. IstModelDecorator is not a mixin.');
+    console.error('Arguments for IstModelDecorator is a model config and not an object for DS.Model. IstModelDecorator is not a mixin.'); // eslint-disable-line no-console
     return;
   }
 
@@ -59,7 +59,7 @@ export default function(newModel) {
                 },
                 function () {
                   // return the cached version
-                  console.warn("Falling back to cached proxy: ", self.get('proxyKind'), self.get('proxyId') );
+                  console.warn("Falling back to cached proxy: ", self.get('proxyKind'), self.get('proxyId') ); // eslint-disable-line no-console
                   resolve(cachedModel);
                   self.incrementProperty('childAssociationDidChange');
                 }
@@ -117,7 +117,6 @@ export default function(newModel) {
     }),
 
     setUnknownProperty: function(key, value){
-      var localKey   = 'proxyLocalProperties.' + key;
       var localHash  = this.get('proxyLocalProperties');
       if (Ember.isBlank(localHash)){
         localHash = {};

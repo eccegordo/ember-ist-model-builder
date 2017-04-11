@@ -50,10 +50,11 @@ export function forEachWait(array, actionFunction, index) {
 }
 
 export function deepSaveArray(items) {
-  var finalSaveRsvp = new Ember.RSVP.Promise(function(finalSaveResolve) {
-    var saveRsvps = [];
-    var item;
-    for(var i = 0; item = items[i]; i++){
+  let finalSaveRsvp = new Ember.RSVP.Promise(function(finalSaveResolve) {
+    let saveRsvps = [];
+    let item;
+    for(let i in items) {
+      item = items[i];
       saveRsvps.push( item.deepSave() );
     }
 
@@ -154,16 +155,16 @@ export default function IstModelChildrenHelpers(modelConfig) {
     },// end processChildNames
 
     processFoundChildren: function (foundChildren, callback, childMeta) {
-      var self = this;
-      var rsvpName = '';
-
-      if (foundChildren && foundChildren.length && foundChildren.length > 0){
-        rsvpName = 'processFoundChildren ' + foundChildren.get('firstObject').constructor + ' size: '  + foundChildren.length;
-      }else if(foundChildren === null){
-        rsvpName = 'processFoundChildren NULL';
-      }else{
-        rsvpName = 'processFoundChildren ' + foundChildren.constructor;
-      }
+      let self = this;
+      // let rsvpName = '';
+      //
+      // if (foundChildren && foundChildren.length && foundChildren.length > 0){
+      //   rsvpName = 'processFoundChildren ' + foundChildren.get('firstObject').constructor + ' size: '  + foundChildren.length;
+      // }else if(foundChildren === null){
+      //   rsvpName = 'processFoundChildren NULL';
+      // }else{
+      //   rsvpName = 'processFoundChildren ' + foundChildren.constructor;
+      // }
 
       return new Ember.RSVP.Promise(function(processFoundChildrenResolve) {
         if (foundChildren === null){
@@ -283,8 +284,6 @@ export default function IstModelChildrenHelpers(modelConfig) {
         collection:    [],
         level:         0,
       });
-    } else {
-
     }
 
     callback(childMeta);
