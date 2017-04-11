@@ -1,6 +1,12 @@
 import Ember from 'ember';
 import DS    from 'ember-data';
 
+const {computed, isBlank, defineProperty, set} = Ember;
+const {create} = Ember.Object;
+const {Promise} = Ember.RSVP;
+
+const {attr} = DS;
+const {extend} = DS.Model;
 
 /*
 The IST Model Builder Decorator is an extension to DS.Model
@@ -19,22 +25,22 @@ own settings and properties to it.
 */
 export default function(newModel) {
 
-  if (!Ember.isBlank(newModel.attributes) ){
+  if (!isBlank(newModel.attributes) ){
     console.error('Arguments for IstModelDecorator is a model config and not an object for DS.Model. IstModelDecorator is not a mixin.'); // eslint-disable-line no-console
     return;
   }
 
-  newModel.proxyCache = DS.attr('raw');
-  newModel.proxyKind  = DS.attr('string');
-  newModel.proxyId    = DS.attr('string');
+  newModel.proxyCache = attr('raw');
+  newModel.proxyKind  = attr('string');
+  newModel.proxyId    = attr('string');
 
   // Add a place for us to store modified proxy properties locally.
-  newModel.proxyLocalProperties = DS.attr('raw', { defaultValue(){return Ember.Object.create({});} });
+  newModel.proxyLocalProperties = attr('raw', { defaultValue(){return create({});} });
 
-  return DS.Model.extend(newModel).extend({
+  return extend(newModel).extend({
     fetchFromStore: true,
 
-    content: Ember.computed('proxyId', 'proxyKind', 'isLoading', {
+    content: computed('proxyId', 'proxyKind', 'isLoading', {
       set(key, v){return v;},
       get () {
         var self = this;
@@ -48,13 +54,13 @@ export default function(newModel) {
 
           return DS.PromiseObject.create({
             content: cachedModel,
-            promise: new Ember.RSVP.Promise(function(resolve){
+            promise: new Promise(function(resolve){
               var finder = self.store.find(self.get('proxyKind'), self.get('proxyId'));
               finder.then(
                 function (found) {
                   cachedModel.destroyRecord();// clear this temporary model from the store.
                   self.set('proxyTo', found);// Update the cache to latest version
-                  Ember.set(self, 'content', found);
+                  set(self, 'content', found);
                   resolve(found);
                   self.incrementProperty('childAssociationDidChange');
                 },
@@ -74,9 +80,9 @@ export default function(newModel) {
       }// end get
     }),
 
-    proxyTo: Ember.computed({
+    proxyTo: computed({
       get() {
-        if (!Ember.isBlank(this.get('proxyId')) ) {
+        if (!isBlank(this.get('proxyId')) ) {
           // getting the value...
           return this.get('content');
         } else {
@@ -89,7 +95,7 @@ export default function(newModel) {
         var proxy = value;
         this.incrementProperty('childAssociationDidChange');
 
-        if (Ember.isBlank(proxy) ) {
+        if (isBlank(proxy) ) {
           this.set('proxyId',    null);
           this.set('proxyKind',  null);
           this.set('proxyCache', null);
@@ -123,8 +129,8 @@ export default function(newModel) {
       }
 
       var localHash  = this.get('proxyLocalProperties');
-      if (Ember.isBlank(localHash)){
-        localHash = Ember.Object.create({});
+      if (isBlank(localHash)){
+        localHash = create({});
         this.set('proxyLocalProperties', localHash);
       }
       localHash.set(key, value);
@@ -139,9 +145,9 @@ export default function(newModel) {
       // Check our special store first
       var localKey   = 'proxyLocalProperties.' + key;
       var proxyKey   = 'proxyTo.' + key;
-      Ember.defineProperty(this,
+      defineProperty(this,
                            key,
-                           Ember.computed('proxyTo',
+                           computed('proxyTo',
                                           'content',
                                           {
                                             get: () => {

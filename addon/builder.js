@@ -8,6 +8,9 @@ import IstModelEditableFields   from 'ember-ist-model-builder/editable-fields';
 import IstModelArchive          from 'ember-ist-model-builder/archive';
 import IstModelDecorator from 'ember-ist-model-builder/decorator';
 
+const {apply} = Ember.$.extend;
+const {extend} = DS.Model;
+
 function IstModelBuilder(modelConfig) {
   var extensions = [];// array of objects we will merge together to make our final model.
 
@@ -23,14 +26,14 @@ function IstModelBuilder(modelConfig) {
   }
 
   // Merge all those objects together to make our final config for DS.Model.
-  var newModel = Ember.$.extend.apply(null, extensions);
+  var newModel = apply(null, extensions);
   var outClass = null;
 
   if (modelConfig.decoratorModel) {
     outClass = new IstModelDecorator(newModel);
   } else{
     // Now return an Ember model.
-    outClass = DS.Model.extend(newModel);
+    outClass = extend(newModel);
   }
 
   // Attach the model config to the class

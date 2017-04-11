@@ -2,20 +2,20 @@ import Ember from 'ember';
 import { attrToTitle }        from 'ember-ist-model-builder/display-helpers';
 import IstModelDisplayHelpers from 'ember-ist-model-builder/display-helpers';
 import ChainedProxyMixin      from 'ember-ist-model-builder/chained-proxy-mixin';
-
-const {computed} = Ember;
+const {extend} = Ember.Object;
+const {computed, A} = Ember;
 
 
 // Implements chained proxy so we can have default settings and custom settings.
 // Call `fieldSetting.applyCustomSettings({label: "Other label"})` to override defaults.
-export var EditableFieldSettingsManager = Ember.Object.extend(ChainedProxyMixin, {
+export var EditableFieldSettingsManager = extend(ChainedProxyMixin, {
   applyCustomSettings: function (settings) {
     this.contents.unshiftObjects([settings]);
   },
 
 });
 
-export var EditableFieldSettingsObject = Ember.Object.extend({
+export var EditableFieldSettingsObject = extend({
   isBelongsTo: computed('valueType', function(){return this.get('valueType') === 'belongsTo';}),
   isHasMany:   computed('valueType', function(){return this.get('valueType') === 'hasMany';}),
   isHasOne:    computed('valueType', function(){return this.get('valueType') === 'hasOne';}),
@@ -38,7 +38,7 @@ export var EditableFieldSettingsObject = Ember.Object.extend({
 export function editableFieldsFor(object){
   var attrConfigs;
   var attrs, label;
-  var fields = Ember.A();
+  var fields = A();
 
 
   if (object.get && object.get('modelConfig') !== undefined){
@@ -109,7 +109,7 @@ export function editableFieldsFor(object){
     });
 
     var manager = EditableFieldSettingsManager.create({
-      contents: Ember.A([defaultSettings])// make sure ember array so binding works properly
+      contents: A([defaultSettings])// make sure ember array so binding works properly
     });
 
     fields.pushObject(manager);
