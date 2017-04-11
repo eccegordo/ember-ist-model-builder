@@ -144,7 +144,7 @@ export default function(newModel) {
                            Ember.computed('proxyTo',
                                           'content',
                                           {
-                                            get: (k) => {
+                                            get: () => {
                                               var v = this.get(localKey);
                                               if (v !== undefined){
                                                 return v;
