@@ -18,6 +18,7 @@ own settings and properties to it.
 
 */
 export default function(newModel) {
+
   if (!Ember.isBlank(newModel.attributes) ){
     console.error('Arguments for IstModelDecorator is a model config and not an object for DS.Model. IstModelDecorator is not a mixin.'); // eslint-disable-line no-console
     return;
@@ -28,7 +29,7 @@ export default function(newModel) {
   newModel.proxyId    = DS.attr('string');
 
   // Add a place for us to store modified proxy properties locally.
-  newModel.proxyLocalProperties = DS.attr('raw');
+  newModel.proxyLocalProperties = DS.attr('raw', { defaultValue(){return Ember.Object.create({});} });
 
   return DS.Model.extend(newModel).extend({
     fetchFromStore: true,
@@ -117,12 +118,17 @@ export default function(newModel) {
     }),
 
     setUnknownProperty: function(key, value){
+      if (key && key.match(/^_/)){
+        return this._super(...arguments);
+      }
+
       var localHash  = this.get('proxyLocalProperties');
       if (Ember.isBlank(localHash)){
-        localHash = {};
+        localHash = Ember.Object.create({});
+        this.set('proxyLocalProperties', localHash);
       }
-      localHash[key] = value;
-      this.get('proxyLocalProperties', localHash);
+      localHash.set(key, value);
+
       return value;
     },
 
@@ -132,24 +138,29 @@ export default function(newModel) {
     unknownProperty: function (key) {
       // Check our special store first
       var localKey   = 'proxyLocalProperties.' + key;
-      var proxyKey   = 'content.' + key;
-
-      var fnCode = "var v = this.get('"+localKey+"'); "+
-          "if (v !== undefined){return v;}" +
-          "else{return this.get('"+proxyKey+"'); }";
-
+      var proxyKey   = 'proxyTo.' + key;
       Ember.defineProperty(this,
                            key,
                            Ember.computed('proxyTo',
                                           'content',
-                                          new Function(fnCode)
+                                          {
+                                            get: (k) => {
+                                              var v = this.get(localKey);
+                                              if (v !== undefined){
+                                                return v;
+                                              }else{
+                                                return this.get(proxyKey);
+                                              }
+                                            },
+                                            set: (k, v) => {
+                                              this.set(localKey, v);
+                                              return v;
+                                            }
+                                          }
                                          )
                           );
-
       return this.get(key);
     }
-
-
   });// end extend for decoratorModel
 
 } // end export

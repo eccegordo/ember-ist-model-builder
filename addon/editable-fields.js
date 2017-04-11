@@ -112,7 +112,7 @@ export function editableFieldsFor(object){
       contents: Ember.A([defaultSettings])// make sure ember array so binding works properly
     });
 
-    fields.push(manager);
+    fields.pushObject(manager);
   }
   return fields;
 }

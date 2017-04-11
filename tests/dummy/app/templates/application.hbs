@@ -4,13 +4,13 @@
 <h3>{{model.student.typeTitlePlural}}</h3>
 <p>
   <strong>{{model.student.displayTitle}}</strong><br/>
-  
+
   {{model.student.nameTitle}}:
   {{model.student.nameFormatted}}<br/>
-  
+
   {{model.student.ageTitle}} ({{model.student.ageUnit}}):
   {{model.student.age}}<br/>
-  
+
   {{model.student.dogYearsTitle}}:
   {{model.student.dogYearsFormatted}} {{model.student.dogYearsUnit}}<br/>
 </p>
@@ -23,14 +23,16 @@
     {{attr.title}}: {{attr.valueFormatted}}<br/>
   {{/each}}
 {{/each}}
-  
+
 
 
 <hr />
 
 <h1>Decorated</h1>
-Name: {{input type="text" value=model.decorated.name}} [{{model.decorated.name}}]
+Name: {{input type="text" value=model.decorated.name}}
 <pre>
+  name =         [{{model.decorated.name}}]<br/>
+  friendsSince = [{{model.decorated.friendsSince}}]<br/>
   proxyLocalProperties.name = [{{model.decorated.proxyLocalProperties.name}}]<br/>
   proxyCache.name = [{{model.decorated.proxyCache.name}}]
 </pre>
@@ -44,7 +46,7 @@ Name: {{input type="text" value=model.decorated.name}} [{{model.decorated.name}}
   <label>{{field.label}}</label>
   {{input type="text" value=field.value }}<br />
 {{/each}}
-  
+
 
 <hr />
 <h1>Chain:</h1>
@@ -55,5 +57,3 @@ Name: {{input type="text" value=model.decorated.name}} [{{model.decorated.name}}
 </p>
 
 Edit School name: {{input type="text" value=model.secondChainItem.schoolName}}
-
-

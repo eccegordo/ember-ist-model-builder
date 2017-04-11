@@ -1,6 +1,6 @@
 {
   "name": "ember-ist-model-builder",
-  "version": "0.1.17",
+  "version": "0.2.0",
   "description": "Builds enhanced Ember models to help with display, child management, formatting, decorating, and archiving.",
   "bugs": {
     "url": "https://github.com/bdevel/ember-ist-model-builder/issues"
@@ -20,7 +20,7 @@
     "test": "ember test"
   },
   "engines": {
-    "node": ">= 0.10.0"
+    "node": ">= 4"
   },
   "author": "Tyler Roberts",
   "license": "MIT",
