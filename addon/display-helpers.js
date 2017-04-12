@@ -1,8 +1,11 @@
 import Ember from "ember";
-//import DS from 'ember-data';
+const {isEmpty, isBlank, computed, A} = Ember;
+const {dasherize, capitalize} = Ember.String;
+const {inflector} = Ember.Inflector;
+
 
 export function roundNumber(number, decimals) {
-  if (Ember.isEmpty(number)){
+  if (isEmpty(number)){
     return null;
   }
   number = number.valueOf();// make sure it's the real number.
@@ -17,7 +20,7 @@ export function roundNumber(number, decimals) {
 
 // tries to use i18n large numbers unless it's Safari it just uses english style.
 export function prettyNumber(number, decimals) {
-  if (Ember.isEmpty(number)){
+  if (isEmpty(number)){
     return null;
   }
   number = number.valueOf();// make sure it's the real number.
@@ -51,7 +54,7 @@ export function prettyNumber(number, decimals) {
 // Use decimals for the percentage. IE, 50% = 0.5
 // tries to use i18n percent unless it's Safari it just uses english style.
 export function prettyPercent(number, decimals) {
-  if (Ember.isEmpty(number)){
+  if (isEmpty(number)){
     return null;
   }
   number = number.valueOf();// make sure it's the real number.
@@ -67,9 +70,9 @@ export function prettyPercent(number, decimals) {
 
 // Takes a camel case attr name and adds spaces and capitalizes each word.
 export function attrToTitle(attrName){
-  return Ember.String.dasherize(attrName).replace(/-/g, ' ').replace(/\w+/g, function(c){
+  return dasherize(attrName).replace(/-/g, ' ').replace(/\w+/g, function(c){
     // Look in our special strings, otherwize just upcase the first letter.
-    return (IstModelDisplayHelpers.specialStringTitles[c.toLowerCase()] || Ember.String.capitalize(c.toLowerCase())  );
+    return (IstModelDisplayHelpers.specialStringTitles[c.toLowerCase()] || capitalize(c.toLowerCase())  );
   });
 }
 
@@ -137,28 +140,28 @@ export function displayGroupsForAttrFromConfig(modelConfig, attrName){
 function IstModelDisplayHelpers(modelConfig) {
   var newModel = {
     // This is a pretty version of the model name.
-    typeTitle: Ember.computed(function(){
+    typeTitle: computed(function(){
       var title = this.get('modelConfig').typeTitle;
       if (title === undefined) {
-        title = Ember.String.capitalize(Ember.String.dasherize(this.constructor.typeKey.toString()).replace(/\-/g, ' '));
+        title = capitalize(dasherize(this.constructor.typeKey.toString()).replace(/\-/g, ' '));
       }
       return title;
     }),
 
     // Use for a listing of models
-    typeTitlePlural: Ember.computed('typeTitle', function(){
-      return Ember.Inflector.inflector.pluralize(this.get('typeTitle'));
+    typeTitlePlural: computed('typeTitle', function(){
+      return inflector.pluralize(this.get('typeTitle'));
     }),
 
     // Default title will be the type title plus name or title attribute, if defined.
-    displayTitle: Ember.computed('typeTitle', 'name', 'title', function () {
+    displayTitle: computed('typeTitle', 'name', 'title', function () {
       var name = this.get('name');
       var title = this.get('title');
       var typeTitle = this.get('typeTitle');
 
-      if (!Ember.isBlank(name)){
+      if (!isBlank(name)){
         return typeTitle + ': ' + name;
-      } else if (!Ember.isBlank(title)){
+      } else if (!isBlank(title)){
         return typeTitle + ': ' + title;
       } else {
         return typeTitle;
@@ -208,15 +211,15 @@ function IstModelDisplayHelpers(modelConfig) {
             }
           }
 
-          if(attrConfig.hideIfBlank && Ember.isBlank(value) ||
-             (attrConfig.hideIfBlank && value.valueOf && Ember.isBlank(value.valueOf() ))
+          if(attrConfig.hideIfBlank && isBlank(value) ||
+             (attrConfig.hideIfBlank && value.valueOf && isBlank(value.valueOf() ))
             ){
             return false;
           } else {
             return true;
           }
         }catch(e){
-          console.error(e);
+          console.error(e); // eslint-disable-line no-console
           return true;
         }
       });
@@ -235,11 +238,11 @@ function IstModelDisplayHelpers(modelConfig) {
       var attrs = this.attributeNamesForDisplayGroup(displayGroup);
       var out   = attrs.map(function (attrName) {
         var attrObj = Ember.Object.extend({
-          title:          Ember.computed.alias('model.' + attrName + 'Title'),
-          value:          Ember.computed.alias('model.' + attrName),
-          valueFormatted: Ember.computed.alias('model.' + attrName + 'Formatted'),
-          displayGroups:  Ember.computed.alias('model.' + attrName + 'DisplayGroups'),
-          unit:           Ember.computed.alias('model.' + attrName + 'Unit'),
+          title:          computed.alias('model.' + attrName + 'Title'),
+          value:          computed.alias('model.' + attrName),
+          valueFormatted: computed.alias('model.' + attrName + 'Formatted'),
+          displayGroups:  computed.alias('model.' + attrName + 'DisplayGroups'),
+          unit:           computed.alias('model.' + attrName + 'Unit'),
         }).create({
           attrName: attrName,
           model:    self,
@@ -249,7 +252,7 @@ function IstModelDisplayHelpers(modelConfig) {
         };
         return attrObj;
       });
-      return Ember.A(out);
+      return A(out);
     },
 
     // Round floats, other wize return value with unit attached
@@ -298,7 +301,7 @@ function IstModelDisplayHelpers(modelConfig) {
 
     var groups = displayGroupsForAttrFromConfig(modelConfig, attrName);
     allDisplayGroupNames = allDisplayGroupNames.concat(groups);
-    newModel[attrName + "DisplayGroups"] = Ember.computed(attrName, new Function(
+    newModel[attrName + "DisplayGroups"] = computed(attrName, new Function(
       "return this.displayGroupsForAttr('"+attrName+"');"
     ));
 
@@ -310,13 +313,13 @@ function IstModelDisplayHelpers(modelConfig) {
       // Then in the `fooFormatted` function, pass the value to the formatter.
       newModel[attrName + "Formatter"] = attrConfig.formatter;
 
-      newModel[attrName + "Formatted"] = Ember.computed(attrName, new Function(
+      newModel[attrName + "Formatted"] = computed(attrName, new Function(
         "return this." + attrName + "Formatter( this.get('"+attrName+"'), this.get('"+attrName+"Unit') ) "
       ));
 
     } else {
       // just return the value
-      newModel[attrName + "Formatted"] = Ember.computed(attrName, new Function(
+      newModel[attrName + "Formatted"] = computed(attrName, new Function(
         "return this.defaultFormatter(this.get('"+attrName+"'), this.get('"+attrName+"Unit') ) "
       ));
     }
@@ -324,10 +327,10 @@ function IstModelDisplayHelpers(modelConfig) {
   }// end foreach attr in modelConfig
 
   // Add a ____DisplayAttributes property for each display group.
-  allDisplayGroupNames = Ember.A(allDisplayGroupNames).uniq();
+  allDisplayGroupNames = A(allDisplayGroupNames).uniq();
   for(var i = 0; i < allDisplayGroupNames.length; i++){
     var displayGroup = allDisplayGroupNames[i];
-    newModel[displayGroup + "DisplayAttributes"] = Ember.computed('definedAttributes.[]', new Function(
+    newModel[displayGroup + "DisplayAttributes"] = computed('definedAttributes.[]', new Function(
       "return this.attributeDescriptorsForDisplayGroup('"+displayGroup+"') "
     )).volatile();
   }// end for loop

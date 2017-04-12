@@ -1,5 +1,8 @@
 import Ember from 'ember';
 import DS    from 'ember-data';
+const {computed,isBlank, A} = Ember;
+const {Promise, all} = Ember.RSVP;
+const {create} = DS.PromiseArray;
 
 // Give it an array and an action function that returns
 // a promise. It will call the action function for each item
@@ -9,14 +12,14 @@ import DS    from 'ember-data';
 // so that you know when the whole array has been processed.
 export function forEachWait(array, actionFunction, index) {
   var rsvpName = '';
-  if (array.get === undefined){array = Ember.A(array);}// convert to ember array if not one already
+  if (array.get === undefined){array = A(array);}// convert to ember array if not one already
   if (array.length && array.length > 0){
     rsvpName = 'forEachPromise ' + array.get('firstObject').constructor + ' size: '  + array.length;
   }else{
     rsvpName = 'forEachPromise Zero length: ' + array;
   }
 
-  return new Ember.RSVP.Promise(function(arrayResolve){
+  return new Promise(function(arrayResolve){
     // Set up the array index for recursion counting
     if (index === undefined){
       index = 0;
@@ -50,14 +53,15 @@ export function forEachWait(array, actionFunction, index) {
 }
 
 export function deepSaveArray(items) {
-  var finalSaveRsvp = new Ember.RSVP.Promise(function(finalSaveResolve) {
-    var saveRsvps = [];
-    var item;
-    for(var i = 0; item = items[i]; i++){
+  let finalSaveRsvp = new Promise(function(finalSaveResolve) {
+    let saveRsvps = [];
+    let item;
+    for(let i in items) {
+      item = items[i];
       saveRsvps.push( item.deepSave() );
     }
 
-    Ember.RSVP.all(saveRsvps).then(function () {
+    all(saveRsvps).then(function () {
       finalSaveResolve(items);
     });
   });// end allSaveRsvp
@@ -73,7 +77,7 @@ export var AssociationDescriptor = Ember.Object.extend({
   level:         0,
 
   // Get title from the config where the relationship was defined.
-  title: Ember.computed('parent', 'attrName', function () {
+  title: computed('parent', 'attrName', function () {
     var attrName = this.get('attrName');
     var parent = this.get('parent');
     if (parent === null){return '';}
@@ -81,7 +85,7 @@ export var AssociationDescriptor = Ember.Object.extend({
   }),
 
   // Get display groups from the config where the relationship was defined.
-  displayGroups: Ember.computed('parent', 'attrName', function () {
+  displayGroups: computed('parent', 'attrName', function () {
     var attrName = this.get('attrName');
     var parent = this.get('parent');
     if (parent === null){return [];}
@@ -123,9 +127,9 @@ export default function IstModelChildrenHelpers(modelConfig) {
     processChildNames: function (model, callback, childNames, level) {
       var helpers = this;// this referes to 'helpers'
 
-      return new Ember.RSVP.Promise(function(processChildNamesResolve) {
+      return new Promise(function(processChildNamesResolve) {
         var loopRsvp = forEachWait(childNames, function (childName) {
-          return new Ember.RSVP.Promise(function(innerChildNameResolve) {
+          return new Promise(function(innerChildNameResolve) {
 
             var childRsvp = model.get(childName);
             childRsvp.then(function (foundChildren) {
@@ -154,23 +158,23 @@ export default function IstModelChildrenHelpers(modelConfig) {
     },// end processChildNames
 
     processFoundChildren: function (foundChildren, callback, childMeta) {
-      var self = this;
-      var rsvpName = '';
+      let self = this;
+      // let rsvpName = '';
+      //
+      // if (foundChildren && foundChildren.length && foundChildren.length > 0){
+      //   rsvpName = 'processFoundChildren ' + foundChildren.get('firstObject').constructor + ' size: '  + foundChildren.length;
+      // }else if(foundChildren === null){
+      //   rsvpName = 'processFoundChildren NULL';
+      // }else{
+      //   rsvpName = 'processFoundChildren ' + foundChildren.constructor;
+      // }
 
-      if (foundChildren && foundChildren.length && foundChildren.length > 0){
-        rsvpName = 'processFoundChildren ' + foundChildren.get('firstObject').constructor + ' size: '  + foundChildren.length;
-      }else if(foundChildren === null){
-        rsvpName = 'processFoundChildren NULL';
-      }else{
-        rsvpName = 'processFoundChildren ' + foundChildren.constructor;
-      }
-
-      return new Ember.RSVP.Promise(function(processFoundChildrenResolve) {
+      return new Promise(function(processFoundChildrenResolve) {
         if (foundChildren === null){
           // I guess the child has no value.
           processFoundChildrenResolve();
           return;
-        }else if(Ember.isBlank(foundChildren.get('length')) ){
+        }else if(isBlank(foundChildren.get('length')) ){
           // Child was a hasOne.
           var child = foundChildren;
           childMeta.set('object', child);
@@ -203,7 +207,7 @@ export default function IstModelChildrenHelpers(modelConfig) {
 
 
     processChild: function (child, callback, childMeta) {
-      return new Ember.RSVP.Promise(function(processChildResolve) {
+      return new Promise(function(processChildResolve) {
         if(child.everyChildAssociation === undefined){
           processChildResolve();// not a model builder object. Can't go any deeper
           return;
@@ -240,18 +244,18 @@ export default function IstModelChildrenHelpers(modelConfig) {
   // There is also a inDisplayGroup() function so you can see if that association
   // is in a particular display group.
   // Note, the first item this returns is the model itself
-  newModel.childAssociations = Ember.computed('childAssociationDidChange', function(){
+  newModel.childAssociations = computed('childAssociationDidChange', function(){
     var self = this;
-    var out = Ember.A([]);
+    var out = A([]);
     var finalResolve;
 
-    var promise = new Ember.RSVP.Promise(function(resolve) {
+    var promise = new Promise(function(resolve) {
       finalResolve = resolve;// pass this to outer scope.
     });
 
 
     // make an array to return.
-    var promiseArray =  DS.PromiseArray.create({
+    var promiseArray = create({
       promise: promise,
       content: out
     });
@@ -275,7 +279,7 @@ export default function IstModelChildrenHelpers(modelConfig) {
 
     if (childMeta === undefined){
       childMeta = AssociationDescriptor.extend({
-        title:        Ember.computed.alias('object.displayTitle'),
+        title:        computed.alias('object.displayTitle'),
         diplayGroups: [],
       }).create({
         //attrName:      'self',
@@ -283,14 +287,12 @@ export default function IstModelChildrenHelpers(modelConfig) {
         collection:    [],
         level:         0,
       });
-    } else {
-
     }
 
     callback(childMeta);
     var nextLevel = childMeta.level + 1;
 
-    var rsvp = new Ember.RSVP.Promise(function(everyChildAssociationResolve) {
+    var rsvp = new Promise(function(everyChildAssociationResolve) {
 
       var childNames = self.definedChildAssociations.slice(0);// clone array
       if (childNames.length === 0 ) {
@@ -298,7 +300,7 @@ export default function IstModelChildrenHelpers(modelConfig) {
         return;
       }
 
-      var eachChildRsvp = new Ember.RSVP.Promise(function(eachChildResolve) {
+      var eachChildRsvp = new Promise(function(eachChildResolve) {
         // Process each child, then we're notify that we're done.
         self.helpers.processChildNames(self, callback, childNames, nextLevel).then(function () {
           eachChildResolve();
@@ -323,7 +325,7 @@ export default function IstModelChildrenHelpers(modelConfig) {
   // then you can save your self and the hasManys.
   newModel.deepSave = function () {
     var self = this;
-    return new Ember.RSVP.Promise(function(finalSaveResolve) {
+    return new Promise(function(finalSaveResolve) {
       self.deepSaveBelongsTo().then(function (saved) {
         saved.deepSaveHasMany().then(function (savedAgain) {
           finalSaveResolve(savedAgain);
@@ -338,9 +340,9 @@ export default function IstModelChildrenHelpers(modelConfig) {
   newModel.deepSaveBelongsTo = function () {
     var self = this;
     var hasManys = this.get('definedHasManyAssociations');
-    var childSaveRsvps = Ember.A();// Keep a list of children we are saving.
+    var childSaveRsvps = A();// Keep a list of children we are saving.
 
-    var finalSaveRsvp = new Ember.RSVP.Promise(function(finalSaveResolve) {
+    var finalSaveRsvp = new Promise(function(finalSaveResolve) {
       // Get all children
       self.get('childAssociations').then(function (childAssociations) {
         childAssociations.forEach(function (childAssoc) {
@@ -359,7 +361,7 @@ export default function IstModelChildrenHelpers(modelConfig) {
         });
 
         // Wait for all children to be saved, then do final resolve
-        Ember.RSVP.all(childSaveRsvps, 'deepSaveBelongsTo').then(function () {
+        all(childSaveRsvps, 'deepSaveBelongsTo').then(function () {
           self.save().then(function(savedSelf){
             finalSaveResolve(savedSelf);
           });
@@ -380,9 +382,9 @@ export default function IstModelChildrenHelpers(modelConfig) {
   newModel.deepSaveHasMany = function () {
     var self           = this;
     var hasManys       = this.get('definedHasManyAssociations');
-    var childSaveRsvps = Ember.A();// Keep a list of children we are saving.
+    var childSaveRsvps = A();// Keep a list of children we are saving.
 
-    var finalSaveRsvp = new Ember.RSVP.Promise(function(finalSaveResolve) {
+    var finalSaveRsvp = new Promise(function(finalSaveResolve) {
       // Save your self
       self.save().then(function (savedSelf) {
         // Then get children
@@ -404,7 +406,7 @@ export default function IstModelChildrenHelpers(modelConfig) {
           });
 
           // Wait for all children to be saved, then do final resolve
-          Ember.RSVP.all(childSaveRsvps, 'deepSaveHasMany').then(function () {
+          all(childSaveRsvps, 'deepSaveHasMany').then(function () {
             finalSaveResolve(self);
           });
 
@@ -419,9 +421,9 @@ export default function IstModelChildrenHelpers(modelConfig) {
   // Save yourself, then save all of your hasMany or hasOne relationships
   newModel.deepDestroy = function () {
     var self       = this;
-    var childRsvps = Ember.A();
+    var childRsvps = A();
 
-    var finalRsvp = new Ember.RSVP.Promise(function(finalResolve) {
+    var finalRsvp = new Promise(function(finalResolve) {
       self.get('childAssociations').then(function (childAssociations) {
         // Delete the children first.
         var reverseChildAssociations = childAssociations.reverse();
@@ -430,7 +432,7 @@ export default function IstModelChildrenHelpers(modelConfig) {
         });
 
         // Wait for all children to be saved, then do final resolve
-        Ember.RSVP.all(childRsvps, 'deepDestroy').then(function () {
+        all(childRsvps, 'deepDestroy').then(function () {
           finalResolve();
         });
 
