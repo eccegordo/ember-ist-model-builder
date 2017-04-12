@@ -2,11 +2,8 @@ import Ember from 'ember';
 import DS    from 'ember-data';
 
 const {computed, isBlank, defineProperty, set} = Ember;
-const {create} = Ember.Object;
 const {Promise} = Ember.RSVP;
-
 const {attr} = DS;
-const {extend} = DS.Model;
 
 /*
 The IST Model Builder Decorator is an extension to DS.Model
@@ -35,9 +32,9 @@ export default function(newModel) {
   newModel.proxyId    = attr('string');
 
   // Add a place for us to store modified proxy properties locally.
-  newModel.proxyLocalProperties = attr('raw', { defaultValue(){return create({});} });
+  newModel.proxyLocalProperties = attr('raw', { defaultValue(){return Ember.Object.create({});} });
 
-  return extend(newModel).extend({
+  return DS.Model.extend(newModel).extend({
     fetchFromStore: true,
 
     content: computed('proxyId', 'proxyKind', 'isLoading', {
@@ -130,7 +127,7 @@ export default function(newModel) {
 
       var localHash  = this.get('proxyLocalProperties');
       if (isBlank(localHash)){
-        localHash = create({});
+        localHash = Ember.Object.create({});
         this.set('proxyLocalProperties', localHash);
       }
       localHash.set(key, value);

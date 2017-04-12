@@ -1,10 +1,7 @@
 import Ember from 'ember';
 import DS    from 'ember-data';
 const {computed,isBlank, A} = Ember;
-const {extend} = Ember.Object;
 const {Promise, all} = Ember.RSVP;
-const {apply} = Ember.observer;
-
 const {create} = DS.PromiseArray;
 
 // Give it an array and an action function that returns
@@ -72,7 +69,7 @@ export function deepSaveArray(items) {
   return finalSaveRsvp;
 }
 
-export var AssociationDescriptor = extend({
+export var AssociationDescriptor = Ember.Object.extend({
   attrName:      null,// attr name on parent
   object:        null,// the child
   parent:        null,// the parent
@@ -479,7 +476,7 @@ export default function IstModelChildrenHelpers(modelConfig) {
   // It wont tell us if any attributes way down in the
   // nest have been changed.
   newModel.childAssociationDidChange = 0;
-  newModel.childAssocationChangeObserver = apply(newModel, childPropsToWatch);
+  newModel.childAssocationChangeObserver = Ember.observer.apply(newModel, childPropsToWatch);
 
 
   //propsToObserve = "newModel.childAssocationChangeObserver.observes("+propsToObserve+")";

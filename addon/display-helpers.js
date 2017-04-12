@@ -1,6 +1,5 @@
 import Ember from "ember";
 const {isEmpty, isBlank, computed, A} = Ember;
-const {extend} = Ember.Object;
 const {dasherize, capitalize} = Ember.String;
 const {inflector} = Ember.Inflector;
 
@@ -238,7 +237,7 @@ function IstModelDisplayHelpers(modelConfig) {
       var self  = this;
       var attrs = this.attributeNamesForDisplayGroup(displayGroup);
       var out   = attrs.map(function (attrName) {
-        var attrObj = extend({
+        var attrObj = Ember.Object.extend({
           title:          computed.alias('model.' + attrName + 'Title'),
           value:          computed.alias('model.' + attrName),
           valueFormatted: computed.alias('model.' + attrName + 'Formatted'),
