@@ -2,7 +2,6 @@ import Ember from 'ember';
 import DS    from 'ember-data';
 const {computed,isBlank, A} = Ember;
 const {Promise, all} = Ember.RSVP;
-const {create} = DS.PromiseArray;
 
 // Give it an array and an action function that returns
 // a promise. It will call the action function for each item
@@ -255,7 +254,7 @@ export default function IstModelChildrenHelpers(modelConfig) {
 
 
     // make an array to return.
-    var promiseArray = create({
+    var promiseArray = DS.PromiseArray.create({
       promise: promise,
       content: out
     });
