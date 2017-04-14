@@ -264,7 +264,10 @@ function IstModelDisplayHelpers(modelConfig) {
       if (value.valueOf){value = value.valueOf();}
       if (typeof value === "number") {
         formatted = this.prettyNumber(value);
-      }else{
+      } else if (isEmpty(value)) {
+        formatted = ''; // this can be indication of bug in model file
+        // console.warn('Unknown value in defaultFormatter returning empty string', value, unit); // eslint-disable-line no-console
+      } else {
         formatted = value.toString();
       }
 
