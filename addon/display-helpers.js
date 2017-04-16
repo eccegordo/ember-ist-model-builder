@@ -255,7 +255,7 @@ function IstModelDisplayHelpers(modelConfig) {
       return A(out);
     },
 
-    // Round floats, other wize return value with unit attached
+    // Round floats, otherwise return value with unit attached
     defaultFormatter: function(value, unit){
       var formatted = '';
       if (value === null || value === undefined) {
@@ -264,11 +264,12 @@ function IstModelDisplayHelpers(modelConfig) {
       if (value.valueOf){value = value.valueOf();}
       if (typeof value === "number") {
         formatted = this.prettyNumber(value);
-      } else if (isEmpty(value)) {
-        formatted = ''; // this can be indication of bug in model file
-        // console.warn('Unknown value in defaultFormatter returning empty string', value, unit); // eslint-disable-line no-console
       } else {
-        formatted = value.toString();
+        if (isEmpty(value)){
+          formatted = ''; // guard against the case of undefined/null values
+        } else {
+          formatted = value.toString();
+        }
       }
 
       if (unit !== undefined) {
