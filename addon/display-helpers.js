@@ -27,8 +27,8 @@ export function prettyNumber(number, decimals) {
   if (decimals === undefined){decimals = 2;}
   // Never round to zero, give at least once decimal
   if (number > -1 && number < 1 && number !== 0.0){
-    if (!!window.Intl && window.locale){
-      return new window.Intl.NumberFormat(window.locale, {maximumSignificantDigits: 2}).format(number);
+    if (number.toLocaleString){
+      return number.toLocaleString(); // This is kinda slow new window.Intl.NumberFormat(window.locale, {maximumSignificantDigits: 2}).format(number);
     } else {
       // We'll do it ourselves.
       var rawNumber = number;
@@ -43,8 +43,8 @@ export function prettyNumber(number, decimals) {
     number = roundNumber(number, decimals);
   }
 
-  if (!!window.Intl && window.locale){
-    return new window.Intl.NumberFormat(window.locale).format(number);
+  if (number.toLocaleString){
+    return number.toLocaleString();
   }else{
     return number + '';
   }
