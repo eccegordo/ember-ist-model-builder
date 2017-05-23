@@ -188,11 +188,9 @@ function IstModelDisplayHelpers(modelConfig) {
       definedAttributes.forEach(function (attrName) {
         if (attrName === undefined){return;}
         groups.forEach(function (group) {
-          if (typeof self.get(attrName + 'DisplayGroups') === 'object' && self.get(attrName + 'DisplayGroups').indexOf(group) === -1) {
-            return;
+          if (typeof self.get(attrName + 'DisplayGroups') === 'object' && self.get(attrName + 'DisplayGroups').indexOf(group) != -1) {
+            results.push(attrName);
           }
-
-          results.push(attrName);
         });
       });
 
